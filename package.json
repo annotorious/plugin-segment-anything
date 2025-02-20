@@ -1,0 +1,54 @@
+{
+  "name": "@annotorious/plugin-segment-anything",
+  "version": "0.1.0",
+  "description": "A smart polygon selection tool based on SegmentAnything 2",
+  "author": "Rainer Simon",
+  "license": "BSD-3-Clause",
+  "homepage": "https://github.com/annotorious/plugin-segment-anything",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/annotorious/plugin-segment-anything.git"
+  },
+  "bugs": {
+    "url": "https://github.com/annotorious/plugin-segment-anything/issues"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "main": "./dist/annotorious-plugin-sam.js",
+  "module": "./dist/annotorious-plugin-sam.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/annotorious-plugin-sam.js",
+      "require": "./dist/annotorious-plugin-sam.js"
+    },
+    "./annotorious-plugin-smart-tools.css": "./dist/annotorious-plugin-sam.css"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/node": "^22.13.4",
+    "@types/openseadragon": "^3.0.10",
+    "svelte": "^4.2.19",
+    "svelte-preprocess": "^6.0.3",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.14",
+    "vite-plugin-dts": "^4.5.0"
+  },
+  "peerDependencies": {
+    "@annotorious/annotorious": "^3.1.3",
+    "@annotorious/openseadragon": "^3.1.3"
+  },
+  "dependencies": {
+    "@techstark/opencv-js": "^4.10.0-release.1",
+    "openseadragon": "^5.0.1"
+  }
+}
