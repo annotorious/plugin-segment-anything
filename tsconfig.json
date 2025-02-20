@@ -8,7 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": false,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"]
@@ -19,6 +19,6 @@
     "target": "ESNext",
     "verbatimModuleSyntax": true
   },
-  "include": ["./src/**/*", "./test/**/*"],
+  "include": ["./src/**/*"],
   "exclude": ["./node_modules", "./dist"]
 }

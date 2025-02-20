@@ -13,13 +13,14 @@ export default defineConfig({
       entryRoot: './src'
     })
   ],
+  publicDir: 'models',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
   },
   server: {
-    open: '/test/index.html'
+    open: '/test/index.html',
   },
   build: {
     sourcemap: true,
