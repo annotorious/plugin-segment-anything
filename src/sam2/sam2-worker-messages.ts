@@ -1,5 +1,6 @@
 import type { Tensor } from 'onnxruntime-web/all';
 import type { Point } from '@/types';
+import type { InferenceSession } from 'onnxruntime-web';
 
 /** Commands **/
 interface SAM2WorkerInitCommand {
@@ -24,7 +25,7 @@ interface SAM2WorkerEncodeImageCommand {
 
 interface SAM2WorkerDecodeCommand {
 
-  type: 'decode';
+  type: 'decode_mask';
 
   points: Point[];
 
@@ -49,6 +50,8 @@ interface SAM2WorkerSuccessEncodedImage {
 interface SAM2WorkerSuccessDecoded {
 
   type: 'decoding_complete';
+
+  result: InferenceSession.ReturnType;
 
 }
 

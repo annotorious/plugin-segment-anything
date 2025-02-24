@@ -15,9 +15,9 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
     const { float32Array, shape } = e.data.data;
     const t = new Tensor('float32', float32Array, shape);
     SAM2.encodeImage(t).then(() => self.postMessage({ type: 'encoding_complete' }));
-  } else if (type === 'decode') {
+  } else if (type === 'decode_mask') {
     const { points } = e.data;
-    SAM2.decode(points).then(() => self.postMessage({ type: 'decoding_complete' }));
+    SAM2.decode(points).then(result => self.postMessage({ type: 'decoding_complete', result }));
   } 
 }
 

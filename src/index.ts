@@ -6,6 +6,8 @@ import type { SAM2WorkerResult } from './sam2/sam2-worker-messages';
 import { canvasToFloat32Array, resizeCanvas } from './lib/image-utils';
 import type { Point } from './types';
 
+import './index.css';
+
 export const mountPlugin = (anno: ImageAnnotator) => {
   const container = anno.element;
 
@@ -17,7 +19,7 @@ export const mountPlugin = (anno: ImageAnnotator) => {
   const previewCanvas = createPreviewCanvas(anno.element);
 
   const debouncedPreview = pDebounce((pt: Point) => {
-    SAM2.postMessage({ type: 'decode', points: [pt] });
+    SAM2.postMessage({ type: 'decode_mask', points: [pt] });
   }, 200);
 
   const onPointerMove = (evt: PointerEvent) => {
@@ -31,13 +33,14 @@ export const mountPlugin = (anno: ImageAnnotator) => {
     if (type === 'init_complete') {
       // Models loaded - encode the image
       console.log('[annotorious-sam] Encoding image...');
-      const data = canvasToFloat32Array(resizeCanvas(image, { w: 1024, h: 1024 }));
+      const data = canvasToFloat32Array(resizeCanvas(image));
       SAM2.postMessage({ type: 'encode_image', data })
     } else if (type === 'encoding_complete') {
       console.log('[annotorious-sam] Encoding complete');
       container.addEventListener('pointermove', onPointerMove);
     } else if (type === 'decoding_complete') {
-      console.log('decoded');
+      console.log('asdfas', message.data);
+      previewCanvas?.renderMask(message.data.result);
     }
   });
 

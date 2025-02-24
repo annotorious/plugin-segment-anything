@@ -1,23 +1,32 @@
-import pDebounce from 'p-debounce';
-import type { Point, SAM2 } from './types';
+import type { InferenceSession } from 'onnxruntime-web/all';
+import { float32ArrayToCanvas, resizeCanvas, sliceTensor } from './lib/image-utils';
 
 export const createPreviewCanvas = (container: HTMLDivElement) => {
   const image = container.querySelector('img');
   if (!image) return;
 
-  const debouncedPreview = pDebounce((pt: Point) => {
-    // sam.preview(pt);
-  }, 200);
+  const renderMask = (result: InferenceSession.ReturnType) => {
+    // SAM2 returns 3 mask along with scores -> select best one
+    // See https://github.com/geronimi73/next-sam/blob/main/app/page.jsx
+    const maskTensors = result.masks;
 
-  const onPointerMove = (evt: PointerEvent) => {
-    const { offsetX, offsetY } = evt;
-    debouncedPreview({ x: offsetX, y: offsetY, label: 1 });
+    const [_, __, width, height] = maskTensors.dims;
+
+    // @ts-expect-error
+    const maskScores = result.iou_predictions.cpuData;
+    const bestMaskIdx = maskScores.indexOf(Math.max(...maskScores));
+
+    const bestMaskArray = sliceTensor(maskTensors, bestMaskIdx)
+    let bestMaskCanvas = float32ArrayToCanvas(bestMaskArray, width, height)
+    bestMaskCanvas = resizeCanvas(bestMaskCanvas);
+
+    bestMaskCanvas.setAttribute('class', 'sam2-preview');
+
+    container.querySelector('.sam2-preview')?.remove();
+    container.appendChild(bestMaskCanvas);
   }
 
-  image.addEventListener('pointermove', onPointerMove);
-
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-
-  container
+  return {
+    renderMask
+  }
 }

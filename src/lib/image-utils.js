@@ -1,3 +1,7 @@
+const IMAGE_SIZE = { w: 1024, h: 1024 };
+
+const MASK_SIZE = { w: 256, h: 256 };
+
 // By geronimi73 – MIT License
 // https://github.com/geronimi73/next-sam/blob/main/lib/imageutils.js
 export function maskImageCanvas(imageCanvas, maskCanvas) {
@@ -33,7 +37,7 @@ export function maskImageCanvas(imageCanvas, maskCanvas) {
   return canvas;
 }
 
-export function resizeCanvas(canvasOrig, size) {
+export function resizeCanvas(canvasOrig, size = IMAGE_SIZE) {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   canvas.height = size.h;
