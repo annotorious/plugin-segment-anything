@@ -3,10 +3,14 @@ import type { ImageAnnotator } from '@annotorious/annotorious';
 import SAM2Worker from './sam2/sam2-worker.ts?worker';
 import { createPreviewCanvas } from './preview-canvas';
 import type { SAM2WorkerResult } from './sam2/sam2-worker-messages';
-import { canvasToFloat32Array, resizeCanvas } from './lib/image-utils';
+import { resizeCanvas, canvasToFloat32Array } from './lib/image-utils-ts';
 import type { Point } from './types';
 
+import { getImageData } from './lib/get-image-data';
+
 import './index.css';
+import { Placement } from 'openseadragon';
+
 
 export const mountPlugin = (anno: ImageAnnotator) => {
   const container = anno.element;
@@ -16,33 +20,44 @@ export const mountPlugin = (anno: ImageAnnotator) => {
 
   const SAM2 = new SAM2Worker();
 
-  const previewCanvas = createPreviewCanvas(anno.element);
-
   const debouncedPreview = pDebounce((pt: Point) => {
     SAM2.postMessage({ type: 'decode_mask', points: [pt] });
   }, 200);
 
-  const onPointerMove = (evt: PointerEvent) => {
-    const { offsetX: x, offsetY: y } = evt;
-    debouncedPreview({ x, y, label: 1});
-  }
+  // Off-screen copy, resized and padded to 1024x1024px.
+  getImageData(image).then(({ canvas: bufferedImage, placement }) => {
 
-  SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
-    const { type } = message.data;
-
-    if (type === 'init_complete') {
-      // Models loaded - encode the image
-      console.log('[annotorious-sam] Encoding image...');
-      const data = canvasToFloat32Array(resizeCanvas(image));
-      SAM2.postMessage({ type: 'encode_image', data })
-    } else if (type === 'encoding_complete') {
-      console.log('[annotorious-sam] Encoding complete');
-      container.addEventListener('pointermove', onPointerMove);
-    } else if (type === 'decoding_complete') {
-      console.log('asdfas', message.data);
-      previewCanvas?.renderMask(message.data.result);
+    const onPointerMove = (evt: PointerEvent) => {
+      const scaleX = image.naturalWidth / image.width;
+      const scaleY = image.naturalHeight / image.height;
+  
+      const { offsetX, offsetY } = evt;
+  
+      const x = offsetX * scaleX + placement.x;
+      const y = offsetY * scaleY + placement.y;
+  
+      debouncedPreview({ x, y, label: 1});
     }
+
+    const previewCanvas = createPreviewCanvas(anno.element, placement);
+
+    SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
+      const { type } = message.data;
+  
+      if (type === 'init_complete') {
+        // Models loaded - encode the image
+        console.log('[annotorious-sam] Encoding image...');
+        const data = canvasToFloat32Array(bufferedImage);
+        SAM2.postMessage({ type: 'encode_image', data })
+      } else if (type === 'encoding_complete') {
+        console.log('[annotorious-sam] Encoding complete');
+        container.addEventListener('pointermove', onPointerMove);
+      } else if (type === 'decoding_complete') {
+        previewCanvas?.renderMask(message.data.result);
+      }
+    });
+  
+    SAM2.postMessage({ type: 'init' });
   });
 
-  SAM2.postMessage({ type: 'init' });
 }
