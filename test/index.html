@@ -48,10 +48,18 @@
     </div>
 
     <script type="module">
+      import { createImageAnnotator } from '@annotorious/annotorious';
       import { mountPlugin } from '../src';
 
       window.onload = () => {
-        mountPlugin(document.getElementById('sample-image'));
+        const anno = createImageAnnotator(document.getElementById('sample-image'))
+        const plugin = mountPlugin(anno);
+
+        /*
+        plugin.on('initialized', () => {
+          console.log('SAM2 plugin initialized');
+        })
+        */
       }
     </script>
   </body>
