@@ -22,36 +22,44 @@
       #container img {
         width: 100%;
       }
-      
-      svg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-      }
-
-      polygon {
-        fill: transparent;
-        stroke: #00ff00;
-        stroke-width: 2px;
-      }
     </style>
   </head>
   <body>
     <div id="container">
+      <button id="plugin-state">
+        Start
+      </button>
       <img id="sample-image" src="example.jpg" />
-      <svg id="overlay"></svg>
     </div>
 
     <script type="module">
       import { createImageAnnotator } from '@annotorious/annotorious';
       import { mountPlugin } from '../src';
 
+      import '@annotorious/annotorious/annotorious.css';
+
+      let state = 'Start';
+
       window.onload = () => {
-        const anno = createImageAnnotator(document.getElementById('sample-image'))
-        const plugin = mountPlugin(anno);
+        const anno = createImageAnnotator(document.getElementById('sample-image'));
+
+        const plugin = mountPlugin(anno, {
+          enabled: false,
+          showPreview: true
+        });
+
+        const btn = document.getElementById('plugin-state');
+        btn.addEventListener('click', () => {
+          if (state === 'Start') {
+            plugin.setEnabled(true);
+            state = 'Click to Select'
+          } else {
+            plugin.setEnabled(false);
+            state = 'Start';
+          }
+
+          btn.innerHTML = state;
+        });
 
         /*
         plugin.on('initialized', () => {

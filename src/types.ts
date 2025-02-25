@@ -1,5 +1,13 @@
 import type { InferenceSession, Tensor } from 'onnxruntime-web/all';
 
+export interface SAMPluginOpts {
+
+  enabled?: boolean;
+
+  showPreview?: boolean;
+
+}
+
 export interface SAM2 {
 
   init(): Promise<void>;

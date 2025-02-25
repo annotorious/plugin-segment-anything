@@ -6,7 +6,11 @@ export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) =
   const image = container.querySelector('img');
   if (!image) return;
 
+  let _visible = true;
+
   const renderMask = (result: InferenceSession.ReturnType) => {
+    if (!_visible) return;
+
     const canvas = maskToCanvas(
       result, 
       bounds,
@@ -18,7 +22,15 @@ export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) =
     container.appendChild(canvas);
   }
 
+  const setVisible = (visible: boolean) => {
+    _visible = visible;
+
+    if (!visible)
+      container.querySelector('.a9s-sam-preview')?.remove();
+  }
+
   return {
-    renderMask
+    renderMask,
+    setVisible
   }
 }
