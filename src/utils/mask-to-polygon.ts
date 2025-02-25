@@ -2,6 +2,7 @@ import cv from '@techstark/opencv-js';
 import type { InferenceSession } from 'onnxruntime-web/all';
 import type { Bounds } from '@/types';
 import { maskToCanvas } from './mask-to-canvas';
+import { boundsFromPoints, ShapeType, type Polygon } from '@annotorious/annotorious';
 
 export const maskToPolygon = (
   result: InferenceSession.ReturnType, 
@@ -36,7 +37,7 @@ export const maskToPolygon = (
   cv.findContours(dst, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
   // Collect polygons
-  const polygons = [];
+  const polygons: Polygon[] = [];
 
   if (contours.size() > 0) {
     let largestContourIdx = 0;
@@ -57,17 +58,24 @@ export const maskToPolygon = (
 
     cv.approxPolyDP(contour, simplifiedContour, epsilon, true);
     
-    let points = [];
+    let points: [number, number][] = [];
 
     for (let i = 0; i < simplifiedContour.rows; i++) {
-      points.push({
-        x: simplifiedContour.data32S[i * 2],
-        y: simplifiedContour.data32S[i * 2 + 1]
-      });
+      points.push([
+        simplifiedContour.data32S[i * 2],
+        simplifiedContour.data32S[i * 2 + 1]
+      ]);
     }
     
-    // TODO
-    polygons.push(points);
+    const polygon: Polygon = {
+      type: ShapeType.POLYGON,
+      geometry: {
+        bounds: boundsFromPoints(points),
+        points
+      }
+    }
+    polygons.push(polygon);
+
     simplifiedContour.delete();
   }
 

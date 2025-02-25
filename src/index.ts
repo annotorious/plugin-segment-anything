@@ -1,5 +1,6 @@
 import pDebounce from 'p-debounce';
-import type { ImageAnnotator } from '@annotorious/annotorious';
+import { v4 as uuidv4 } from 'uuid';
+import type { ImageAnnotation, ImageAnnotator } from '@annotorious/annotorious';
 import { canvasToFloat32Array, maskToPolygon, prepareSAM2Canvas } from './utils';
 import SAM2Worker from './sam2/sam2-worker.ts?worker';
 import type { SAM2WorkerResult } from './sam2';
@@ -68,7 +69,22 @@ export const mountPlugin = (anno: ImageAnnotator) => {
       } else if (type === 'decoding_complete') {
         // Render mask every time the worker has decoded one
         const polygon = maskToPolygon(message.data.result, bounds);
-        console.log('got mask', polygon);
+
+        const id = uuidv4();
+
+        const annotation: ImageAnnotation = {
+          id,
+          bodies: [],
+          target: {
+            annotation: id,
+            selector: polygon,
+            creator: { id: 'rainer' },
+            created: new Date()
+          }
+        };
+
+
+        anno.state.store.addAnnotation(annotation);
       }
     });
   
