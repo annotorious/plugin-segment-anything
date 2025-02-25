@@ -18,19 +18,18 @@ export const mountPlugin = (anno: ImageAnnotator) => {
 
   const debouncedPreview = pDebounce((pt: Point) => {
     SAM2.postMessage({ type: 'decode_mask', points: [pt] });
-  }, 200);
+  }, 50);
 
   // Off-screen copy, resized and padded to 1024x1024px.
   prepareSAM2Canvas(image).then(({ canvas: bufferedImage, bounds }) => {
-
     const onPointerMove = (evt: PointerEvent) => {
-      const scaleX = image.naturalWidth / image.width;
-      const scaleY = image.naturalHeight / image.height;
+      const scaleX = image.naturalWidth / image.offsetWidth;
+      const scaleY = image.naturalHeight / image.offsetHeight;
   
       const { offsetX, offsetY } = evt;
   
-      const x = offsetX * scaleX + bounds.x;
-      const y = offsetY * scaleY + bounds.y;
+      const x = (offsetX * scaleX) + bounds.x;
+      const y = (offsetY * scaleY) + bounds.y;
   
       debouncedPreview({ x, y, label: 1});
     }
@@ -51,7 +50,6 @@ export const mountPlugin = (anno: ImageAnnotator) => {
         // Image encoded – add pointer listeners
         container.addEventListener('pointermove', onPointerMove);
       } else if (type === 'decoding_complete') {
-
         // Render mask every time the worker has decoded one
         previewCanvas?.renderMask(message.data.result);
       }

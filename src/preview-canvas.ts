@@ -19,7 +19,12 @@ export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) =
     const bestMaskIdx = maskScores.indexOf(Math.max(...maskScores));
 
     // HTML canvas, 256x256 px
-    const bestMask = float32ArrayToCanvas(sliceTensor(maskTensors, bestMaskIdx), width, height);
+    const bestMask = float32ArrayToCanvas(
+      sliceTensor(maskTensors, bestMaskIdx), 
+      width, 
+      height,
+      [128, 255, 128, 85]
+    );
 
     // Clip the original image size from the 1024 x 1024
     const resized = document.createElement('canvas');

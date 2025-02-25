@@ -80,7 +80,7 @@ export const createSAM2 = (): SAM2 => {
   
   const decode = async (points: Point[]) => {
     const session = await getORTSession(decoder);
-  
+
     const flatPoints = points.map(point => ([point.x, point.y]));
     const flatLabels = points.map(point => point.label);
   
@@ -105,7 +105,7 @@ export const createSAM2 = (): SAM2 => {
       has_mask_input: new Tensor('float32', [0], [1])
     };
   
-    return await session.run(inputs);
+    return session.run(inputs);
   }
 
   return {
