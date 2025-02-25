@@ -25,7 +25,7 @@ interface SAM2WorkerEncodeImageCommand {
 
 interface SAM2WorkerDecodeCommand {
 
-  type: 'decode_mask';
+  type: 'decode' | 'decode_preview';
 
   points: Point[];
 
@@ -49,7 +49,7 @@ interface SAM2WorkerSuccessEncodedImage {
 
 interface SAM2WorkerSuccessDecoded {
 
-  type: 'decoding_complete';
+  type: 'preview_complete' | 'decoding_complete';
 
   result: InferenceSession.ReturnType;
 

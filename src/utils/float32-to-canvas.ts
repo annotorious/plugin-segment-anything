@@ -5,8 +5,7 @@ export const float32ArrayToCanvas = (
   width: number, 
   height: number,
   foreground: [number, number, number, number] = [255, 255, 255, 255], // White
-  background: [number, number, number, number] = [0, 0, 0, 0], // black, transparent
-  blurRadius: number = 20
+  background: [number, number, number, number] = [0, 0, 0, 0] // black, transparent
 ) => {
   const C = 4; // 4 output channels, RGBA
   const imageData = new Uint8ClampedArray(array.length * C);

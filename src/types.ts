@@ -16,9 +16,9 @@ export interface Point {
 
   y: number;
 
-  label: number;
-
 }
+
+export type LabeledPoint = Point & { label: number };
 
 export type Size = { w: number, h: number };
 

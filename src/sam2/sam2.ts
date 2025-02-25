@@ -1,11 +1,13 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { EncodedImage } from './sam2-worker-messages';
-import type { Point, SAM2 } from '@/types';
+import type { LabeledPoint, SAM2 } from '@/types';
 
 const getFilename = (url: string): string => {
   const cleanUrl = url.split(/[?#]/)[0];
   return cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
 }
+
+let currentSession: InferenceSession | null = null;
 
 // Ported to TS from geronimi73 – MIT license
 // See https://github.com/geronimi73/next-sam/blob/main/app/SAM2.js
@@ -16,6 +18,8 @@ export const createSAM2 = (): SAM2 => {
 
   // Current encoded image
   let encodedImage: EncodedImage;
+
+  let lastDecode: Promise<InferenceSession.OnnxValueMapType> | Promise<void> = Promise.resolve();
 
   // Loads a model file from cache or URL
   const loadModel = async (url: string): Promise<ArrayBuffer> => {
@@ -78,34 +82,39 @@ export const createSAM2 = (): SAM2 => {
     }
   }
   
-  const decode = async (points: Point[]) => {
-    const session = await getORTSession(decoder);
+  const decode = async (points: LabeledPoint[]) => {
+    const resultPromise = lastDecode.then(async () => {
+      const session = await getORTSession(decoder);
 
-    const flatPoints = points.map(point => ([point.x, point.y]));
-    const flatLabels = points.map(point => point.label);
+      const flatPoints = points.map(point => ([point.x, point.y]));
+      const flatLabels = points.map(point => point.label);
+    
+      const mask = new Tensor(
+        'float32',
+        new Float32Array(256 * 256),
+        [1, 1, 256, 256]
+      );
+    
+      const inputs = {
+        ...encodedImage,
+        point_coords: new Tensor('float32', flatPoints.flat(), [
+          1,
+          flatPoints.length,
+          2,
+        ]),
+        point_labels: new Tensor('float32', flatLabels, [
+          1,
+          flatLabels.length,
+        ]),
+        mask_input: mask,
+        has_mask_input: new Tensor('float32', [0], [1])
+      };
   
-    const mask = new Tensor(
-      'float32',
-      new Float32Array(256 * 256),
-      [1, 1, 256, 256]
-    );
-  
-    const inputs = {
-      ...encodedImage,
-      point_coords: new Tensor('float32', flatPoints.flat(), [
-        1,
-        flatPoints.length,
-        2,
-      ]),
-      point_labels: new Tensor('float32', flatLabels, [
-        1,
-        flatLabels.length,
-      ]),
-      mask_input: mask,
-      has_mask_input: new Tensor('float32', [0], [1])
-    };
-  
-    return session.run(inputs);
+      return session.run(inputs);
+    });
+    
+    lastDecode = resultPromise;
+    return resultPromise; 
   }
 
   return {

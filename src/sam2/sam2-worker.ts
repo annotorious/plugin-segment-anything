@@ -5,25 +5,23 @@ import type { Point } from '@/types';
 
 const SAM2 = createSAM2();
 
-let decodingBusy = false;
-let decodingPending = false;
-let pendingPoints: Point[] = [];
+let previewBusy = false;
+let previewPending = false;
+let previewPendingPoints: Point[] = [];
 
-const processDecoding = async () => {
-  if (decodingBusy) return; // Ensure only one decoding runs at a time
-
-  if (decodingPending && pendingPoints) {
-    decodingPending = false; // Reset flag before calling decode again
-    decodingBusy = true;
+const processPreview = async () => {
+  if (previewPending && previewPendingPoints) {
+    previewPending = false;
+    previewBusy = true;
 
     try {
-      const result = await SAM2.decode(pendingPoints);
-      self.postMessage({ type: 'decoding_complete', result });
+      const result = await SAM2.decode(previewPendingPoints);
+      self.postMessage({ type: 'preview_complete', result });
     } catch (error) {
       self.postMessage({ type: 'error', error });
     } finally {
-      decodingBusy = false;
-      return await processDecoding(); // Check if another request came in while decoding
+      previewBusy = false;
+      return await processPreview();
     }
   }
 }
@@ -39,20 +37,18 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
     const { float32Array, shape } = e.data.data;
     const t = new Tensor('float32', float32Array, shape);
     SAM2.encodeImage(t).then(() => self.postMessage({ type: 'encoding_complete' }));
-  } else if (type === 'decode_mask') {
-    if (decodingBusy) {
-      // Busy - defer
-      decodingPending = true;
-    } else {
-      pendingPoints = e.data.points;
-      decodingPending = true;
+  } else if (type === 'decode_preview') {
+    previewPendingPoints = [...e.data.points];
+    previewPending = true;
 
-      if (!decodingBusy) {
-        decodingPending = true;
-        processDecoding();
-      }
+    if (!previewBusy) {
+      processPreview();
     }
-  } 
+  } else if (type === 'decode') {
+    SAM2.decode(previewPendingPoints).then(result => {
+      self.postMessage({ type: 'decoding_complete', result });
+    });
+  }
 }
 
 export {}; // Necessary for Vite to treat this as a module
