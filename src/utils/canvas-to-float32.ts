@@ -1,29 +1,5 @@
-const IMAGE_SIZE = { w: 1024, h: 1024 };
-
-export const resizeCanvas = (original: HTMLImageElement | HTMLCanvasElement, size = IMAGE_SIZE) => {
-  const canvas = document.createElement('canvas');
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  canvas.height = size.h;
-  canvas.width = size.w;
-
-  ctx.drawImage(
-    original,
-    0,
-    0,
-    'naturalWidth' in original ? original.naturalWidth : original.width,
-    'naturalHeight' in original ? original.naturalHeight : original.height,
-    0,
-    0,
-    size.w,
-    size.h
-  );
-
-  return canvas;
-}
-
+// Ported to TS from geronimi73 – MIT license
+// https://github.com/geronimi73/next-sam/blob/main/lib/imageutils.js
 export const canvasToFloat32Array = (canvas: HTMLCanvasElement) => {
   const imageData = canvas.getContext('2d')?.getImageData(0, 0, canvas.width, canvas.height).data;
   if (!imageData) return;

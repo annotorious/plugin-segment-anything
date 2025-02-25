@@ -1,16 +1,12 @@
 import pDebounce from 'p-debounce';
 import type { ImageAnnotator } from '@annotorious/annotorious';
+import { canvasToFloat32Array, prepareSAM2Canvas } from './utils';
 import SAM2Worker from './sam2/sam2-worker.ts?worker';
+import type { SAM2WorkerResult } from './sam2';
 import { createPreviewCanvas } from './preview-canvas';
-import type { SAM2WorkerResult } from './sam2/sam2-worker-messages';
-import { resizeCanvas, canvasToFloat32Array } from './lib/image-utils-ts';
 import type { Point } from './types';
 
-import { getImageData } from './lib/get-image-data';
-
 import './index.css';
-import { Placement } from 'openseadragon';
-
 
 export const mountPlugin = (anno: ImageAnnotator) => {
   const container = anno.element;
@@ -25,7 +21,7 @@ export const mountPlugin = (anno: ImageAnnotator) => {
   }, 200);
 
   // Off-screen copy, resized and padded to 1024x1024px.
-  getImageData(image).then(({ canvas: bufferedImage, placement }) => {
+  prepareSAM2Canvas(image).then(({ canvas: bufferedImage, bounds }) => {
 
     const onPointerMove = (evt: PointerEvent) => {
       const scaleX = image.naturalWidth / image.width;
@@ -33,13 +29,13 @@ export const mountPlugin = (anno: ImageAnnotator) => {
   
       const { offsetX, offsetY } = evt;
   
-      const x = offsetX * scaleX + placement.x;
-      const y = offsetY * scaleY + placement.y;
+      const x = offsetX * scaleX + bounds.x;
+      const y = offsetY * scaleY + bounds.y;
   
       debouncedPreview({ x, y, label: 1});
     }
 
-    const previewCanvas = createPreviewCanvas(anno.element, placement);
+    const previewCanvas = createPreviewCanvas(anno.element, bounds);
 
     SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
       const { type } = message.data;
@@ -51,8 +47,12 @@ export const mountPlugin = (anno: ImageAnnotator) => {
         SAM2.postMessage({ type: 'encode_image', data })
       } else if (type === 'encoding_complete') {
         console.log('[annotorious-sam] Encoding complete');
+
+        // Image encoded – add pointer listeners
         container.addEventListener('pointermove', onPointerMove);
       } else if (type === 'decoding_complete') {
+
+        // Render mask every time the worker has decoded one
         previewCanvas?.renderMask(message.data.result);
       }
     });

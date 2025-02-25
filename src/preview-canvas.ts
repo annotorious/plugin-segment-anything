@@ -1,51 +1,44 @@
 import type { InferenceSession } from 'onnxruntime-web/all';
-import { float32ArrayToCanvas, resizeCanvas, sliceTensor } from './lib/image-utils';
+import { float32ArrayToCanvas, sliceTensor } from './utils';
 import type { Bounds } from './types';
 
-export const createPreviewCanvas = (container: HTMLDivElement, placement: Bounds) => {
+export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) => {
   const image = container.querySelector('img');
   if (!image) return;
 
   const renderMask = (result: InferenceSession.ReturnType) => {
-    // SAM2 returns 3 mask along with scores -> select best one
+    // SAM2 returns 3 masks along with scores – select best one
     // See https://github.com/geronimi73/next-sam/blob/main/app/page.jsx
     const maskTensors = result.masks;
 
+    // Mask dimension will be 256x256 (by design of the SAM2 model)
     const [_, __, width, height] = maskTensors.dims;
 
     // @ts-expect-error
     const maskScores = result.iou_predictions.cpuData;
     const bestMaskIdx = maskScores.indexOf(Math.max(...maskScores));
 
-    const bestMaskArray = sliceTensor(maskTensors, bestMaskIdx)
-    let bestMaskCanvas = float32ArrayToCanvas(bestMaskArray, width, height)
-    bestMaskCanvas = resizeCanvas(bestMaskCanvas);
-    bestMaskCanvas.setAttribute('class', 'sam2-preview');
+    // HTML canvas, 256x256 px
+    const bestMask = float32ArrayToCanvas(sliceTensor(maskTensors, bestMaskIdx), width, height);
 
-    /*
-    const visiblePart = document.createElement('canvas');
-    visiblePart.setAttribute('class', 'sam2-preview');
+    // Clip the original image size from the 1024 x 1024
+    const resized = document.createElement('canvas');
+    resized.setAttribute('class', 'a9s-sam-preview');
 
-    visiblePart.width = placement.w;
-    visiblePart.height = placement.h;
+    resized.width = bounds.w;
+    resized.height = bounds.h;
 
-    const ctx = visiblePart.getContext('2d')!;
-
+    const ctx = resized.getContext('2d')!;
     ctx.drawImage(
-      bestMaskCanvas,
-      placement.x,
-      placement.y,
-      bestMaskCanvas.width,
-      bestMaskCanvas.height,
-      0,
-      0,
-      placement.w + placement.x,
-      placement.h + placement.y
+      bestMask,
+      - bounds.x,
+      - bounds.y,
+      bounds.w + 2 * bounds.x,
+      bounds.h + 2 * bounds.y
     );
-    */
 
-    container.querySelector('.sam2-preview')?.remove();
-    container.appendChild(bestMaskCanvas);
+    container.querySelector('.a9s-sam-preview')?.remove();
+    container.appendChild(resized);
   }
 
   return {

@@ -1,4 +1,3 @@
-
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { EncodedImage } from './sam2-worker-messages';
 import type { Point, SAM2 } from '@/types';
@@ -8,6 +7,7 @@ const getFilename = (url: string): string => {
   return cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
 }
 
+// Ported to TS from geronimi73 – MIT license
 // See https://github.com/geronimi73/next-sam/blob/main/app/SAM2.js
 export const createSAM2 = (): SAM2 => {
   // ONNX models

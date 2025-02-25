@@ -1,8 +1,8 @@
 import type { Bounds, Size } from '@/types';
 
-const IMAGE_SIZE = 1024;
-
-const getPlacement = (sourceSize: Size, targetSize: Size): Bounds | undefined => {
+// Ported to TS from geronimi73 – MIT license
+// https://github.com/geronimi73/next-sam/blob/main/lib/imageutils.js
+const getImageBounds = (sourceSize: Size, targetSize: Size): Bounds | undefined => {
   if (sourceSize.h == sourceSize.w) {
     return { x: 0, y: 0, w: targetSize.w, h: targetSize.h };
   } else if (sourceSize.h > sourceSize.w) {
@@ -18,48 +18,26 @@ const getPlacement = (sourceSize: Size, targetSize: Size): Bounds | undefined =>
   }
 }
 
-export const resizeCanvas = (original: HTMLImageElement | HTMLCanvasElement) => {
-  const canvas = document.createElement('canvas');
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  canvas.height = IMAGE_SIZE;
-  canvas.width = IMAGE_SIZE;
-
-  ctx.drawImage(
-    original,
-    0,
-    0,
-    'naturalWidth' in original ? original.naturalWidth : original.width,
-    'naturalHeight' in original ? original.naturalHeight : original.height,
-    0,
-    0,
-    IMAGE_SIZE,
-    IMAGE_SIZE
-  );
-
-  return canvas;
-}
-
-export const getImageData = (
+// Ported to TS from geronimi73 (MIT license)
+// https://github.com/geronimi73/next-sam/blob/main/lib/imageutils.js
+export const prepareSAM2Canvas = (
   image: HTMLImageElement
-): Promise<{ canvas: HTMLCanvasElement, placement: Bounds }> => new Promise((resolve, reject) => {
+): Promise<{ canvas: HTMLCanvasElement, bounds: Bounds }> => new Promise((resolve, reject) => {
   const copy = new Image();
   copy.crossOrigin = 'anonymous';
 
   copy.onload = () => {
-    const placement = getPlacement(
+    const bounds = getImageBounds(
       { h: copy.naturalHeight, w: copy.naturalWidth },
-      { h: IMAGE_SIZE, w: IMAGE_SIZE }
+      { h: 1024, w: 1024 }
     );
 
-    if (!placement)
+    if (!bounds)
       throw '[annotorious-sam] Error processing image';
 
     const canvas = document.createElement('canvas');
-    canvas.width = IMAGE_SIZE;
-    canvas.height = IMAGE_SIZE;
+    canvas.width = 1024;
+    canvas.height = 1024;
 
     canvas
       .getContext('2d')!
@@ -69,13 +47,13 @@ export const getImageData = (
         0,
         copy.naturalWidth,
         copy.naturalHeight,
-        placement.x,
-        placement.y,
-        placement.w,
-        placement.h
+        bounds.x,
+        bounds.y,
+        bounds.w,
+        bounds.h
       );
     
-    resolve({ canvas, placement });
+    resolve({ canvas, bounds });
   }
 
   copy.onerror = error => {
