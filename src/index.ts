@@ -22,11 +22,10 @@ export const mountPlugin = (anno: ImageAnnotator) => {
   }, 50);
 
   // Off-screen copy, resized and padded to 1024x1024px.
-  prepareSAM2Canvas(image).then(({ canvas: bufferedImage, bounds }) => {
-
+  prepareSAM2Canvas(image).then(({ canvas: bufferedImage, bounds, scale }) => {
     const viewportToSAM2Coordinates = (evt: PointerEvent) => {
-      const scaleX = image.naturalWidth / image.offsetWidth;
-      const scaleY = image.naturalHeight / image.offsetHeight;
+      const scaleX = image.naturalWidth / (scale * image.offsetWidth);
+      const scaleY = image.naturalHeight / (scale * image.offsetHeight);
   
       const { offsetX, offsetY } = evt;
   
@@ -68,7 +67,7 @@ export const mountPlugin = (anno: ImageAnnotator) => {
         previewCanvas?.renderMask(message.data.result);
       } else if (type === 'decoding_complete') {
         // Render mask every time the worker has decoded one
-        const polygon = maskToPolygon(message.data.result, bounds);
+        const polygon = maskToPolygon(message.data.result, bounds, scale);
 
         const id = uuidv4();
 
