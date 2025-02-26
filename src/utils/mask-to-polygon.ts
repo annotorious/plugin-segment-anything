@@ -1,6 +1,6 @@
 import cv from '@techstark/opencv-js';
 import type { InferenceSession } from 'onnxruntime-web/all';
-import type { Bounds, Point } from '@/types';
+import type { Bounds } from '@/types';
 import { maskToCanvas } from './mask-to-canvas';
 import { boundsFromPoints, ShapeType, type Polygon } from '@annotorious/annotorious';
 

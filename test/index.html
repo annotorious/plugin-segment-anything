@@ -22,13 +22,21 @@
       #container img {
         width: 100%;
       }
+
+      #plugin-state {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 90;
+      }
     </style>
   </head>
   <body>
+    <button id="plugin-state">
+      Start
+    </button>
+
     <div id="container">
-      <button id="plugin-state">
-        Start
-      </button>
       <img id="sample-image" src="example.jpg" />
     </div>
 

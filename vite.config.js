@@ -29,7 +29,7 @@ export default defineConfig({
     }
   },
   server: {
-    open: '/test/index.html',
+    open: '/test/index.html'
   },
   build: {
     sourcemap: true,

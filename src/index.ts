@@ -124,6 +124,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
   const setShowPreview = (showPreview: boolean) => {
     _showPreview = showPreview;
+    previewCanvas?.setVisible(showPreview);
   }
 
   return {

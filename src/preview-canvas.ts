@@ -14,7 +14,7 @@ export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) =
     const canvas = maskToCanvas(
       result, 
       bounds,
-      [255, 255, 255, 85],
+      [0, 114, 189, 255],
       [0, 0, 0, 0]
     );
 
