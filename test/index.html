@@ -26,6 +26,7 @@
     <script type="module">
       import OpenSeadragon from 'openseadragon';
       import { createOSDAnnotator } from '@annotorious/openseadragon';
+      import { mountOpenSeadragonPlugin } from '../src/openseadragon';
 
       import '@annotorious/openseadragon/annotorious-openseadragon.css';
 
@@ -37,30 +38,7 @@
           gestureSettingsMouse: {
             clickToZoom: false
           },
-          tileSources: {
-            '@context' : 'http://iiif.io/api/image/2/context.json',
-            protocol : 'http://iiif.io/api/image',
-            width : 7808,
-            height : 5941,
-            sizes : [
-              { width : 244, height : 185 },
-              { width : 488, height : 371 },
-              { width : 976, height : 742 }
-            ],
-            tiles : [
-              { width : 256, height : 256, scaleFactors : [ 1, 2, 4, 8, 16, 32 ] }
-            ],
-            '@id' : 'https://iiif.bodleian.ox.ac.uk/iiif/image/af315e66-6a85-445b-9e26-012f729fc49c',
-            profile : [
-              'http://iiif.io/api/image/2/level2.json',
-              { formats : [ 'jpg', 'png', 'webp' ],
-                qualities : ['native','color','gray','bitonal'],
-                supports : ['regionByPct','regionSquare','sizeByForcedWh','sizeByWh','sizeAboveFull','sizeUpscaling','rotationBy90s','mirroring'],
-                maxWidth : 1000,
-                maxHeight : 1000
-              }
-            ]
-          }
+          tileSources: 'https://iiif.bodleian.ox.ac.uk/iiif/image/60b986f3-a97f-48be-9400-a1ee389659ac/info.json'
         });
 
         const anno = createOSDAnnotator(viewer, {
@@ -72,6 +50,8 @@
             fillOpacity: 0.25
           }
         });
+
+        const plugin = mountOpenSeadragonPlugin(anno);
 
         anno.on('createAnnotation', () => {
           modeBtn.innerHTML = 'Move';

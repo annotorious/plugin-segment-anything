@@ -1,26 +1,24 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { EncodedImage } from './sam2-worker-messages';
-import type { LabeledPoint, SAM2, SAM2DecoderInput } from '@/types';
-import { inpaint } from '@techstark/opencv-js';
+import type { SAM2, SAM2DecoderInput } from '@/types';
+import { encode } from 'punycode';
 
 const getFilename = (url: string): string => {
   const cleanUrl = url.split(/[?#]/)[0];
   return cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
 }
 
-let currentSession: InferenceSession | null = null;
-
-// Ported to TS from geronimi73 – MIT license
+// Ported to TS from geronimi73 – MIT license
 // See https://github.com/geronimi73/next-sam/blob/main/app/SAM2.js
 export const createSAM2 = (): SAM2 => {
-  // ONNX models
-  let encoder: ArrayBuffer;
-  let decoder: ArrayBuffer;
+  let encoder: InferenceSession | null = null;
+  let decoder: InferenceSession | null = null;
 
   // Current encoded image
-  let encodedImage: EncodedImage;
+  let encodedImage: EncodedImage | null = null;
 
-  let lastDecode: Promise<InferenceSession.OnnxValueMapType> | Promise<void> = Promise.resolve();
+  let encodingBusy = true;
+  let decodingBusy = false;
 
   // Loads a model file from cache or URL
   const loadModel = async (url: string): Promise<ArrayBuffer> => {
@@ -52,18 +50,22 @@ export const createSAM2 = (): SAM2 => {
       return buffer;
     } catch (error) {
       console.error(error);
-      throw `[annotorious-sam] Download failed: ${url}`;
+      throw new Error(`[annotorious-sam] Download failed: ${url}`);
     }
   }
 
-  const init = () => Promise.all([
-    loadModel('/sam2_hiera_tiny_encoder.with_runtime_opt.ort'),
-    loadModel('/sam2_hiera_tiny_decoder_pr1.onnx')
-  ]).then(([enc, dec]) => {
-    console.log('[annotorious-sam] Models loaded')
-    encoder = enc,
-    decoder = dec;
-  });
+  const init = () =>
+    Promise.all([
+      loadModel('/sam2_hiera_tiny_encoder.with_runtime_opt.ort'),
+      loadModel('/sam2_hiera_tiny_decoder_pr1.onnx')
+    ]).then(async ([enc, dec]) => {
+      console.log('[annotorious-sam] Models loaded')
+      encoder = await getORTSession(enc);
+      decoder = await getORTSession(dec);
+    }).catch((error) => {
+      console.error('[annotorious-sam] Initialization failed:', error);
+      throw error;
+    });
 
   const getORTSession = async (model: ArrayBuffer): Promise<InferenceSession> => {
     return InferenceSession.create(model, {
@@ -71,24 +73,36 @@ export const createSAM2 = (): SAM2 => {
       logSeverityLevel: 3
     });
   }
-
-  let decodeSession: InferenceSession;
   
   const encodeImage = async (input: Tensor): Promise<void> => {
-    const session = await getORTSession(encoder);
-    const results = await session.run({ image: input });
-  
-    encodedImage = {
-      high_res_feats_0: results[session.outputNames[0]],
-      high_res_feats_1: results[session.outputNames[1]],
-      image_embed: results[session.outputNames[2]],
-    }
+    if (!encoder)
+      throw new Error('[annotorious-sam] Encoder not initialized');
 
-    decodeSession = await getORTSession(decoder);
+    try {
+      encodingBusy = true;
+
+      const results = await encoder.run({ image: input });
+      console.log('[annotorious-sam] Encoded image');
+
+      encodedImage = {
+        high_res_feats_0: results[encoder.outputNames[0]],
+        high_res_feats_1: results[encoder.outputNames[1]],
+        image_embed: results[encoder.outputNames[2]],
+      };
+
+      encodingBusy = false;
+    } catch (error) {
+      console.error('[annotorious-sam] Encoding failed:', error);
+      throw error;
+    }
   }
   
-  const decode = async (input: SAM2DecoderInput) => {
-    const resultPromise = lastDecode.then(async () => {
+  const decode = async (input: SAM2DecoderInput): Promise<InferenceSession.OnnxValueMapType | void> => {
+    if (!decoder || !encode || !encodedImage || decodingBusy || encodingBusy) return Promise.resolve();
+    
+    try {
+      decodingBusy = true;
+
       const flatPoints = [...input.include, ...input.exclude].map(point => ([point.x, point.y]));
       const flatLabels = [
         ...input.include.map(() => 1),
@@ -116,11 +130,16 @@ export const createSAM2 = (): SAM2 => {
         has_mask_input: new Tensor('float32', [0], [1])
       };
   
-      return decodeSession.run(inputs);
-    });
-    
-    lastDecode = resultPromise;
-    return resultPromise; 
+      const result = await decoder.run(inputs);
+
+      decodingBusy = false;
+
+      return result;
+    } catch (error) {
+      console.error('[annotorious-sam] Decoding failed:', error);
+      decodingBusy = false;
+      throw error;
+    }
   }
 
   return {
@@ -128,5 +147,4 @@ export const createSAM2 = (): SAM2 => {
     encodeImage,
     decode
   }
-
 }

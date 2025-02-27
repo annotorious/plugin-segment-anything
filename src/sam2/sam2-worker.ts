@@ -16,8 +16,10 @@ const processPreview = async () => {
 
     try {
       const result = await SAM2.decode({ include: previewPendingPoints, exclude: [] });
-      self.postMessage({ type: 'preview_complete', result });
+      if (result)
+        self.postMessage({ type: 'preview_complete', result });
     } catch (error) {
+      console.log(error);
       self.postMessage({ type: 'error', error });
     } finally {
       previewBusy = false;
@@ -36,7 +38,14 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
   } else if (type === 'encode_image') {
     const { float32Array, shape } = e.data.data;
     const t = new Tensor('float32', float32Array, shape);
-    SAM2.encodeImage(t).then(() => self.postMessage({ type: 'encoding_complete' }));
+    SAM2.encodeImage(t)
+      .then(() => {
+        console.log('endoc complete');
+        self.postMessage({ type: 'encoding_complete' })
+      })
+      .catch(error => {
+        console.error('error', error);
+      });
   } else if (type === 'decode_preview') {
     previewPendingPoints = [e.data.point];
     previewPending = true;
@@ -47,7 +56,8 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
   } else if (type === 'decode') {
     const { input } = e.data;
     SAM2.decode(input).then(result => {
-      self.postMessage({ type: 'decoding_complete', result });
+      if (result)
+        self.postMessage({ type: 'decoding_complete', result });
     });
   }
 }
