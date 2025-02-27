@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SAM Protoype</title>
+    <style>
+      html, body {
+        align-items: center;
+        background-color: #e9e9e9;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+      }
+
+      #container {
+        background-color: #fff;
+        position: relative;
+      }
+
+      #container img {
+        width: 100%;
+      }
+
+      #plugin-state {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 90;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="plugin-state">
+      Start
+    </button>
+
+    <div id="container">
+      <img id="sample-image" src="example.jpg" />
+    </div>
+
+    <script type="module">
+      import { createImageAnnotator } from '@annotorious/annotorious';
+      import { mountPlugin } from '../src';
+
+      import '@annotorious/annotorious/annotorious.css';
+
+      let state = 'Start';
+
+      window.onload = () => {
+        const anno = createImageAnnotator(document.getElementById('sample-image'));
+
+        const plugin = mountPlugin(anno, {
+          enabled: false,
+          showPreview: true
+        });
+
+        const btn = document.getElementById('plugin-state');
+        btn.addEventListener('click', () => {
+          if (state === 'Start') {
+            plugin.setEnabled(true);
+            state = 'Click to Select'
+          } else {
+            plugin.setEnabled(false);
+            state = 'Start';
+          }
+
+          btn.innerHTML = state;
+        });
+
+        /*
+        plugin.on('initialized', () => {
+          console.log('SAM2 plugin initialized');
+        })
+        */
+      }
+    </script>
+  </body>
+</html>

@@ -4,76 +4,90 @@
     <meta charset="utf-8" />
     <title>SAM Protoype</title>
     <style>
-      html, body {
-        align-items: center;
-        background-color: #e9e9e9;
-        display: flex;
-        height: 100%;
-        justify-content: center;
+      html, body, #openseadragon {
         margin: 0;
         padding: 0;
-      }
-
-      #container {
-        background-color: #fff;
-        position: relative;
-      }
-
-      #container img {
         width: 100%;
+        height: 100%;
       }
 
-      #plugin-state {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 90;
+      .openseadragon-canvas {
+        outline: none;
       }
     </style>
   </head>
   <body>
-    <button id="plugin-state">
-      Start
-    </button>
-
-    <div id="container">
-      <img id="sample-image" src="example.jpg" />
+    <div id="openseadragon">
+      <div class="buttons" style="position:absolute; top: 10px; right: 10px; z-index: 1;">
+        <button id="mode">Move</button>
+      </div>
     </div>
 
     <script type="module">
-      import { createImageAnnotator } from '@annotorious/annotorious';
-      import { mountPlugin } from '../src';
+      import OpenSeadragon from 'openseadragon';
+      import { createOSDAnnotator } from '@annotorious/openseadragon';
 
-      import '@annotorious/annotorious/annotorious.css';
-
-      let state = 'Start';
+      import '@annotorious/openseadragon/annotorious-openseadragon.css';
 
       window.onload = () => {
-        const anno = createImageAnnotator(document.getElementById('sample-image'));
-
-        const plugin = mountPlugin(anno, {
-          enabled: false,
-          showPreview: true
-        });
-
-        const btn = document.getElementById('plugin-state');
-        btn.addEventListener('click', () => {
-          if (state === 'Start') {
-            plugin.setEnabled(true);
-            state = 'Click to Select'
-          } else {
-            plugin.setEnabled(false);
-            state = 'Start';
+        const viewer = OpenSeadragon({
+          id: 'openseadragon',
+          prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@3.1/build/openseadragon/images/', 
+          crossOriginPolicy: 'Anonymous',
+          gestureSettingsMouse: {
+            clickToZoom: false
+          },
+          tileSources: {
+            '@context' : 'http://iiif.io/api/image/2/context.json',
+            protocol : 'http://iiif.io/api/image',
+            width : 7808,
+            height : 5941,
+            sizes : [
+              { width : 244, height : 185 },
+              { width : 488, height : 371 },
+              { width : 976, height : 742 }
+            ],
+            tiles : [
+              { width : 256, height : 256, scaleFactors : [ 1, 2, 4, 8, 16, 32 ] }
+            ],
+            '@id' : 'https://iiif.bodleian.ox.ac.uk/iiif/image/af315e66-6a85-445b-9e26-012f729fc49c',
+            profile : [
+              'http://iiif.io/api/image/2/level2.json',
+              { formats : [ 'jpg', 'png', 'webp' ],
+                qualities : ['native','color','gray','bitonal'],
+                supports : ['regionByPct','regionSquare','sizeByForcedWh','sizeByWh','sizeAboveFull','sizeUpscaling','rotationBy90s','mirroring'],
+                maxWidth : 1000,
+                maxHeight : 1000
+              }
+            ]
           }
-
-          btn.innerHTML = state;
         });
 
-        /*
-        plugin.on('initialized', () => {
-          console.log('SAM2 plugin initialized');
-        })
-        */
+        const anno = createOSDAnnotator(viewer, {
+          theme: 'dark',
+          drawingEnabled: false,
+          drawingMode: 'drag',
+          style: {
+            fill: '#000',
+            fillOpacity: 0.25
+          }
+        });
+
+        anno.on('createAnnotation', () => {
+          modeBtn.innerHTML = 'Move';
+          anno.setDrawingEnabled(false)
+        });
+
+        const modeBtn = document.getElementById('mode');
+        modeBtn.addEventListener('click', function() {
+          if (modeBtn.innerHTML == 'Move') {
+            anno.setDrawingEnabled(true);
+            modeBtn.innerHTML = 'Draw';
+          } else {
+            anno.setDrawingEnabled(false);
+            modeBtn.innerHTML = 'Move';
+          }
+        });
       }
     </script>
   </body>
