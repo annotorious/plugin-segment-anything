@@ -14,6 +14,8 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   let _enabled = Boolean(opts.enabled);
   let _showPreview = Boolean(opts.showPreview);
 
+  let currentAnnotationId: string;
+
   const container = anno.element;
 
   let input: SAM2DecoderInput = {
@@ -50,7 +52,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
   const debouncedPreview = pDebounce((pt: LabeledPoint) => {
     SAM2.postMessage({ type: 'decode_preview', point: pt });
-  }, 50);
+  }, 1);
 
   // Off-screen copy, resized and padded to 1024x1024px.
   prepareSAM2Canvas(image).then(({ canvas: bufferedImage, bounds, scale }) => {
@@ -82,6 +84,8 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
         input.include.push({ x, y });
       }
 
+      previewCanvas?.setVisible(false);
+
       inputMarkerCanvas?.setInput(input);
 
       SAM2.postMessage({ type: 'decode', input });
@@ -112,13 +116,11 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
         // Render mask every time the worker has decoded one
         const polygon = maskToPolygon(message.data.result, bounds, scale);
 
-        const id = uuidv4();
-
         const annotation: ImageAnnotation = {
-          id,
+          id: currentAnnotationId,
           bodies: [],
           target: {
-            annotation: id,
+            annotation: currentAnnotationId,
             selector: polygon,
             creator: { id: 'rainer' },
             created: new Date()
@@ -127,8 +129,14 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
         const { store, selection } = anno.state;
 
-        store.addAnnotation(annotation);
-        // selection.setSelected(id);
+        const exists = store.getAnnotation(currentAnnotationId);
+        if (exists) {
+          store.updateAnnotation(currentAnnotationId, annotation);
+        } else {
+          store.addAnnotation(annotation);
+        }
+
+        selection.setSelected(currentAnnotationId);
 
         // TODO need to find a better way for this...
         // setEnabled(false);
@@ -140,6 +148,8 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
   const setEnabled = (enabled: boolean) => {
     _enabled = enabled;
+
+    currentAnnotationId = uuidv4();
 
     updateEventListeners();
 

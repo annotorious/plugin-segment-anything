@@ -1,6 +1,7 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { EncodedImage } from './sam2-worker-messages';
-import type { LabeledPoint, SAM2 } from '@/types';
+import type { LabeledPoint, SAM2, SAM2DecoderInput } from '@/types';
+import { inpaint } from '@techstark/opencv-js';
 
 const getFilename = (url: string): string => {
   const cleanUrl = url.split(/[?#]/)[0];
@@ -70,6 +71,8 @@ export const createSAM2 = (): SAM2 => {
       logSeverityLevel: 3
     });
   }
+
+  let decodeSession: InferenceSession;
   
   const encodeImage = async (input: Tensor): Promise<void> => {
     const session = await getORTSession(encoder);
@@ -80,14 +83,17 @@ export const createSAM2 = (): SAM2 => {
       high_res_feats_1: results[session.outputNames[1]],
       image_embed: results[session.outputNames[2]],
     }
+
+    decodeSession = await getORTSession(decoder);
   }
   
-  const decode = async (points: LabeledPoint[]) => {
+  const decode = async (input: SAM2DecoderInput) => {
     const resultPromise = lastDecode.then(async () => {
-      const session = await getORTSession(decoder);
-
-      const flatPoints = points.map(point => ([point.x, point.y]));
-      const flatLabels = points.map(point => point.label);
+      const flatPoints = [...input.include, ...input.exclude].map(point => ([point.x, point.y]));
+      const flatLabels = [
+        ...input.include.map(() => 1),
+        ...input.exclude.map(() => 0)
+      ];
     
       const mask = new Tensor(
         'float32',
@@ -110,7 +116,7 @@ export const createSAM2 = (): SAM2 => {
         has_mask_input: new Tensor('float32', [0], [1])
       };
   
-      return session.run(inputs);
+      return decodeSession.run(inputs);
     });
     
     lastDecode = resultPromise;

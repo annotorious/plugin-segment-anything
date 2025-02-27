@@ -14,7 +14,7 @@ export interface SAM2 {
 
   encodeImage(input: Tensor): Promise<void>;
 
-  decode(points: Point[]): Promise<InferenceSession.OnnxValueMapType>;
+  decode(input: SAM2DecoderInput): Promise<InferenceSession.OnnxValueMapType>;
 
 }
 
