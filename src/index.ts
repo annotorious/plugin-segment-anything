@@ -136,10 +136,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
           store.addAnnotation(annotation);
         }
 
-        selection.setSelected(currentAnnotationId);
-
-        // TODO need to find a better way for this...
-        // setEnabled(false);
+        // selection.setSelected(currentAnnotationId);
       }
     });
   
