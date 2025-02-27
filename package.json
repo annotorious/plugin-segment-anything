@@ -48,6 +48,7 @@
   "dependencies": {
     "@annotorious/annotorious": "^3.1.4",
     "@annotorious/openseadragon": "^3.1.4",
+    "@huggingface/transformers": "^3.3.3",
     "@techstark/opencv-js": "^4.10.0-release.1",
     "bezier-js": "^6.1.4",
     "nanoevents": "^9.1.0",

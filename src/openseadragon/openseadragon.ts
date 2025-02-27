@@ -7,6 +7,7 @@ import { createPreviewCanvas } from '@/preview-canvas';
 
 import '../index.css';
 import { onImageLoaded } from './on-image-loaded';
+import { createSAM } from '@/huggingface';
 
 const prepareSAM2Canvs = (source: HTMLCanvasElement) => {
   const { bounds, scale } = getImageBounds(
@@ -37,6 +38,10 @@ const prepareSAM2Canvs = (source: HTMLCanvasElement) => {
 }
 
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
+
+  // For testing...
+  const sam = createSAM();
+  sam.loadModel();
   
   const { viewer } = anno;
 
