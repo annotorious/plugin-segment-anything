@@ -4,8 +4,9 @@ import type { ImageAnnotation, ImageAnnotator } from '@annotorious/annotorious';
 import SAM2Worker from './sam2/sam2-worker.ts?worker';
 import type { SAM2WorkerResult } from './sam2';
 import { canvasToFloat32Array, maskToPolygon, prepareSAM2Canvas } from './utils';
+import { createInputMarkerCanvas } from './input-marker-canvas';
 import { createPreviewCanvas } from './preview-canvas';
-import type { LabeledPoint, SAMPluginOpts } from './types';
+import type { LabeledPoint, SAM2DecoderInput, SAMPluginOpts } from './types';
 
 import './index.css';
 
@@ -15,6 +16,14 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
   const container = anno.element;
 
+  let input: SAM2DecoderInput = {
+
+    include: [],
+    
+    exclude: []
+  
+  }; 
+
   const image = container?.querySelector('img') as HTMLImageElement;
   if (!image) return;
 
@@ -22,6 +31,8 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
   let onPointerMove: ((evt: PointerEvent) => void) | null = null;
   let onPointerDown: ((evt: PointerEvent) => void) | null = null;
+
+  let inputMarkerCanvas: ReturnType<typeof createInputMarkerCanvas>;
 
   let previewCanvas: ReturnType<typeof createPreviewCanvas>;
 
@@ -38,7 +49,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   }
 
   const debouncedPreview = pDebounce((pt: LabeledPoint) => {
-    SAM2.postMessage({ type: 'decode_preview', points: [pt] });
+    SAM2.postMessage({ type: 'decode_preview', point: pt });
   }, 50);
 
   // Off-screen copy, resized and padded to 1024x1024px.
@@ -56,16 +67,29 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
     }
 
     onPointerMove = (evt: PointerEvent) => {
+      if (input.include.length + input.exclude.length > 0) return;
+      
       const { x, y } = viewportToSAM2Coordinates(evt);  
       debouncedPreview({ x, y, label: 1 });
     }
 
     onPointerDown = (evt: PointerEvent) => {
       const { x, y } = viewportToSAM2Coordinates(evt);
-      SAM2.postMessage({ type: 'decode', points: [{ x, y, label: 1 }] });
+
+      if (evt.shiftKey) {
+        input.exclude.push({ x, y });
+      } else {
+        input.include.push({ x, y });
+      }
+
+      inputMarkerCanvas?.setInput(input);
+
+      SAM2.postMessage({ type: 'decode', input });
     }
 
     previewCanvas = createPreviewCanvas(anno.element, bounds);
+
+    inputMarkerCanvas = createInputMarkerCanvas(anno.element, bounds, scale);
 
     SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
       const { type } = message.data;
@@ -104,10 +128,10 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
         const { store, selection } = anno.state;
 
         store.addAnnotation(annotation);
-        selection.setSelected(id);
+        // selection.setSelected(id);
 
         // TODO need to find a better way for this...
-        setEnabled(false);
+        // setEnabled(false);
       }
     });
   

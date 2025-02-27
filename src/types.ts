@@ -31,3 +31,11 @@ export type LabeledPoint = Point & { label: number };
 export type Size = { w: number, h: number };
 
 export type Bounds = Size & { x: number, y: number};
+
+export interface SAM2DecoderInput {
+
+  include: Point[];
+
+  exclude: Point[];
+
+}

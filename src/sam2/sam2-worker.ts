@@ -38,14 +38,16 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
     const t = new Tensor('float32', float32Array, shape);
     SAM2.encodeImage(t).then(() => self.postMessage({ type: 'encoding_complete' }));
   } else if (type === 'decode_preview') {
-    previewPendingPoints = [...e.data.points];
+    console.log('dafasd', e.data);
+    previewPendingPoints = [e.data.point];
     previewPending = true;
 
     if (!previewBusy) {
       processPreview();
     }
   } else if (type === 'decode') {
-    SAM2.decode(previewPendingPoints).then(result => {
+    const { input } = e.data;
+    SAM2.decode(input.include.map(pt => ({...pt, label: 1 }))).then(result => {
       self.postMessage({ type: 'decoding_complete', result });
     });
   }

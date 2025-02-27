@@ -3,6 +3,7 @@ import type { InferenceSession } from 'onnxruntime-web/all';
 import type { Bounds } from '@/types';
 import { maskToCanvas } from './mask-to-canvas';
 import { boundsFromPoints, ShapeType, type Polygon } from '@annotorious/annotorious';
+import { chaikinSmooth } from './chaikin-smooth';
 
 export const maskToPolygon = (
   result: InferenceSession.ReturnType, 
@@ -68,11 +69,13 @@ export const maskToPolygon = (
       ]);
     }
     
+    const smoothed = chaikinSmooth(points, 1);
+
     const polygon: Polygon = {
       type: ShapeType.POLYGON,
       geometry: {
-        bounds: boundsFromPoints(points),
-        points
+        bounds: boundsFromPoints(smoothed),
+        points: smoothed
       }
     }
     polygons.push(polygon);

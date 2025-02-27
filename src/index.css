@@ -1,8 +1,18 @@
+.a9s-sam-input-markers {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 20;
+}
+
 .a9s-sam-preview {
   height: 100%;
   left: 0;
   opacity: 0.6;
   position: absolute;
   top: 0;
-  width: 100%
+  width: 100%;
+  z-index: 10;
 }
