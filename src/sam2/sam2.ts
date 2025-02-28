@@ -1,5 +1,5 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
-import type { SAM2, SAM2DecoderInput, EncodedImage } from '@/types';
+import type { SAM2, SAM2DecoderPrompt, EncodedImage } from '@/types';
 import { loadModel } from './utils';
 
 // Ported to TS from geronimi73 – MIT license
@@ -63,7 +63,7 @@ export const createSAM2 = (): SAM2 => {
     });
   }
   
-  const decode = (input: SAM2DecoderInput): Promise<InferenceSession.OnnxValueMapType> => {
+  const decode = (prompt: SAM2DecoderPrompt): Promise<InferenceSession.OnnxValueMapType> => {
     // System ready - encoder and decoder initialized, image encoded
     const ready = decoder && encoder && encodedImage;
     if (!ready) return Promise.reject('SAM2 not ready');
@@ -75,13 +75,13 @@ export const createSAM2 = (): SAM2 => {
     decodingBusy = true;
 
     const points = [
-      ...input.include, 
-      ...input.exclude
+      ...prompt.include, 
+      ...prompt.exclude
     ].map(point => ([point.x, point.y]));
 
     const labels = [
-      ...input.include.map(() => 1),
-      ...input.exclude.map(() => 0)
+      ...prompt.include.map(() => 1),
+      ...prompt.exclude.map(() => 0)
     ];
 
     const mask = new Tensor(

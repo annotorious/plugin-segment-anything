@@ -1,5 +1,5 @@
 import type { InferenceSession } from 'onnxruntime-web';
-import type { Point, SAM2DecoderInput } from '@/types';
+import type { Point, SAM2DecoderPrompt } from '@/types';
 
 /** 
  * Command: initialize the SAM2 instance.
@@ -51,7 +51,7 @@ interface SAM2WorkerDecodeCommand {
 
   type: 'decode';
 
-  input: SAM2DecoderInput;
+  prompt: SAM2DecoderPrompt;
 
 }
 

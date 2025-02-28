@@ -62,7 +62,7 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
     }
 
   } else if (type === 'decode') {
-    SAM2.decode(e.data.input)
+    SAM2.decode(e.data.prompt)
       .then(result => self.postMessage({ type: 'decode_success', result }))
       .catch(error => self.postMessage({ type: 'decode_error', error }));
 

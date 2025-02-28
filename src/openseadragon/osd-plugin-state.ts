@@ -1,4 +1,4 @@
-import type { Bounds, Point } from '@/types';
+import type { Bounds, Point, SAM2DecoderPrompt } from '@/types';
 
 interface OSDPluginState {
 
@@ -19,6 +19,8 @@ interface OSDPluginState {
     currentScale: number;
 
     currentBounds: Bounds;
+
+    currentPrompt?: SAM2DecoderPrompt;
 
   }
 

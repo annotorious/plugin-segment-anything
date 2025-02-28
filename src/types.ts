@@ -26,11 +26,11 @@ export interface SAM2 {
 
   encodeImage(input: Tensor): Promise<void>;
 
-  decode(input: SAM2DecoderInput): Promise<InferenceSession.OnnxValueMapType>;
+  decode(input: SAM2DecoderPrompt): Promise<InferenceSession.OnnxValueMapType>;
 
 }
 
-export interface SAM2DecoderInput {
+export interface SAM2DecoderPrompt {
 
   include: Point[];
 

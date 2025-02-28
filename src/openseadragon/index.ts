@@ -44,6 +44,30 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     }
   }
 
+  const onCanvasClick = (evt: OpenSeadragon.CanvasClickEvent) => {
+    if (!state.sam || !state.isSAMReady || !state.isOSDReady) return;
+
+    const orig = evt.originalEvent as PointerEvent;
+    const pt = { x: orig.offsetX, y: orig.offsetY };
+
+    const translated = viewportToSAM2Coordinates(pt);
+    if (!translated) return;
+
+    if (orig.shiftKey) {
+      state.sam.currentPrompt = {
+        include: (state.sam.currentPrompt?.include || []),
+        exclude: [...(state.sam.currentPrompt?.exclude || []), translated]
+      }
+    } else {
+      state.sam.currentPrompt = {
+        include: [...(state.sam.currentPrompt?.include || []), translated],
+        exclude: (state.sam.currentPrompt?.exclude || []),
+      }
+    }
+
+    SAM2.postMessage({ type: 'decode', prompt: state.sam.currentPrompt });
+  }
+
   const encodeCurrentViewport = () => {
     if (!state.sam) return;
 
@@ -92,12 +116,14 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   viewer.addHandler('animation-start', onAnimationStart);
   viewer.addHandler('animation-finish', onAnimationFinish);
+  viewer.addHandler('canvas-click', onCanvasClick);
 
   const destroy = () => {
     viewer.element.removeEventListener('pointermove', onPointerMove);
 
     viewer.removeHandler('animation-start', onAnimationStart);
     viewer.removeHandler('animation-finish', onAnimationFinish);
+    viewer.removeHandler('canvas-click', onCanvasClick);
   }
 
   const SAM2 = new SAM2Worker();
@@ -124,6 +150,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
         preview.render(message.data.result, state.sam.currentBounds);
     } else if (type === 'decode_success') {
       // TODO
+      console.log('DECODED', message.data);
     } else if (type === 'encode_error') {
       const { viewportVersion } = message.data;
       if (viewportVersion === state.viewportVersion) {

@@ -6,7 +6,7 @@ import type { SAM2WorkerResult } from './sam2';
 import { canvasToFloat32Array, maskToPolygon, prepareSAM2Canvas } from './utils';
 import { createInputMarkerCanvas } from './input-marker-canvas';
 import { createPreviewCanvas } from './preview-canvas';
-import type { Point, SAM2DecoderInput, SAMPluginOpts } from './types';
+import type { Point, SAM2DecoderPrompt, SAMPluginOpts } from './types';
 
 import './index.css';
 
@@ -18,7 +18,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
   const container = anno.element;
 
-  let input: SAM2DecoderInput = {
+  let input: SAM2DecoderPrompt = {
 
     include: [],
     
