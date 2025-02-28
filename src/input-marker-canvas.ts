@@ -1,4 +1,4 @@
-import type { Bounds, Point, SAM2DecoderInput } from './types';
+import type { Bounds, Point, SAM2DecoderPrompt } from './types';
 
 const R = window.devicePixelRatio || 1;
 
@@ -30,7 +30,7 @@ export const createInputMarkerCanvas = (container: HTMLDivElement, bounds: Bound
     ctx.stroke();
   }
 
-  const setInput = (input: SAM2DecoderInput) => {
+  const setInput = (input: SAM2DecoderPrompt) => {
     clear();
     input.include.forEach(pt => drawPoint(pt, '#33ff33'));
     input.exclude.forEach(pt => drawPoint(pt, '#ff3333'));

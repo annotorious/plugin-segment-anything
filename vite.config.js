@@ -1,13 +1,10 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import { sveltePreprocess } from 'svelte-preprocess';
 import dts from 'vite-plugin-dts';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
   plugins: [
-    svelte({ preprocess: sveltePreprocess() }),
     viteStaticCopy({
       targets: [
         {
@@ -42,8 +39,14 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        assetFileNames: 'annotorious-plugin-sam.[ext]'
-      }
+        assetFileNames: 'annotorious-plugin-sam.[ext]',
+        globals: {
+          fs: 'fs',
+          path: 'path',
+          crypto: 'crypto'
+        }
+      },
+      external: ['fs', 'path', 'crypto']
     }
   }
 });
