@@ -3,8 +3,8 @@ import type { SAM2WorkerResult } from '@/sam2';
 import SAM2Worker from '@/sam2/sam2-worker.ts?worker';
 import { canvasToFloat32Array } from '@/utils';
 import { onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
-import { createPreviewCanvas } from './osd-preview-canvas';
 import type { Point } from '@/types';
+import { createPreviewCanvas } from './osd-preview-canvas';
 import { createPluginState } from './osd-plugin-state';
 
 import '../index.css';
