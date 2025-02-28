@@ -2,12 +2,10 @@ import type { OpenSeadragonAnnotator } from '@annotorious/openseadragon';
 import SAM2Worker from '@/sam2/sam2-worker.ts?worker';
 import type { SAM2WorkerResult } from '@/sam2';
 import { canvasToFloat32Array, getImageBounds } from '@/utils';
-import type { Bounds } from '@/types';
 import { createPreviewCanvas } from '@/preview-canvas';
+import { onImageLoaded } from './on-image-loaded';
 
 import '../index.css';
-import { onImageLoaded } from './on-image-loaded';
-import { createSAM } from '@/huggingface';
 
 const prepareSAM2Canvs = (source: HTMLCanvasElement) => {
   const { bounds, scale } = getImageBounds(
@@ -38,10 +36,6 @@ const prepareSAM2Canvs = (source: HTMLCanvasElement) => {
 }
 
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
-
-  // For testing...
-  const sam = createSAM();
-  sam.loadModel();
   
   const { viewer } = anno;
 
@@ -89,7 +83,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
     const { type } = message.data;
 
-    if (type === 'init_complete') {
+    if (type === 'init_success') {
       // Models loaded - encode the image
       console.log('[annotorious-sam] Init complete...');
       initialized = true;
@@ -98,15 +92,15 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
       if (currentSAMCanvas) {
         const data = canvasToFloat32Array(currentSAMCanvas);
-        SAM2.postMessage({ type: 'encode_image', data });
+        SAM2.postMessage({ type: 'encode', data });
       }
-    } else if (type === 'encoding_complete') {
+    } else if (type === 'encode_success') {
       console.log('[annotorious-sam] Encoding complete');
-    } else if (type === 'preview_complete') {
+    } else if (type === 'decode_preview_success') {
       console.log('preview complete!');
       // Render mask every time the worker has decoded one
       previewCanvas?.renderMask(message.data.result);
-    } else if (type === 'decoding_complete') {
+    } else if (type === 'decode_success') {
       // Render mask every time the worker has decoded one
       // const polygon = maskToPolygon(message.data.result, bounds, scale);
 

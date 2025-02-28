@@ -1,17 +1,23 @@
-import type { Tensor } from 'onnxruntime-web/all';
 import type { Point, SAM2DecoderInput } from '@/types';
 import type { InferenceSession } from 'onnxruntime-web';
 
-/** Commands **/
+/** 
+ * Command: initialize the SAM2 instance.
+ * - Load the models from local storage or download them
+ * - Instantiate the encoder and decoder sessions
+ */
 interface SAM2WorkerInitCommand {
 
   type: 'init';
 
 }
 
-interface SAM2WorkerEncodeImageCommand {
+/**
+ * Command: encode the attached image.
+ */
+interface SAM2WorkerEncodeCommand {
 
-  type: 'encode_image';
+  type: 'encode';
 
   data: {
     
@@ -23,6 +29,14 @@ interface SAM2WorkerEncodeImageCommand {
 
 }
 
+/**
+ * Command: decode a mask for the given point.
+ * 
+ * Note that this will perform the same operation as the 'decode'
+ * command, but result in a different response ('preview_complete' 
+ * instead of 'decoding_complete'), so that the app can trigger 
+ * different UI behavior accordingly.
+ */
 interface SAM2WorkerDecodePreviewCommand {
 
   type: 'decode_preview';
@@ -36,34 +50,50 @@ interface SAM2WorkerDecodeCommand {
   type: 'decode';
 
   input: SAM2DecoderInput;
-}
-
-export type SAM2WorkerCommand = SAM2WorkerInitCommand | SAM2WorkerEncodeImageCommand | SAM2WorkerDecodePreviewCommand | SAM2WorkerDecodeCommand;
-
-/** Results **/
-
-interface SAM2WorkerSuccessInit {
-
-  type: 'init_complete';
 
 }
 
-interface SAM2WorkerSuccessEncodedImage {
+export type SAM2WorkerCommand = 
+  SAM2WorkerInitCommand | 
+  SAM2WorkerEncodeCommand | 
+  SAM2WorkerDecodePreviewCommand | 
+  SAM2WorkerDecodeCommand;
 
-  type: 'encoding_complete';
+/**
+ * Response: initialization completed successfully.
+ */
+interface SAM2WorkerInitSuccess {
+
+  type: 'init_success';
 
 }
 
-interface SAM2WorkerSuccessDecoded {
+/**
+ * Response: image encoding completed sucessfully.
+ */
+interface SAM2WorkerEncodeSuccess {
 
-  type: 'preview_complete' | 'decoding_complete';
+  type: 'encode_success';
+
+}
+
+/**
+ * Response: decoding completed successfully.
+ */
+interface SAM2WorkerDecodeSuccess {
+
+  type: 'decode_preview_success' | 'decode_success';
 
   result: InferenceSession.ReturnType;
 
 }
 
-type SAM2WorkerSuccess = SAM2WorkerSuccessInit | SAM2WorkerSuccessEncodedImage | SAM2WorkerSuccessDecoded;
+type SAM2WorkerSuccess = 
+  SAM2WorkerInitSuccess | 
+  SAM2WorkerEncodeSuccess | 
+  SAM2WorkerDecodeSuccess;
 
+/** Error **/
 interface SAM2WorkerError {
 
   type: 'error';
@@ -73,14 +103,3 @@ interface SAM2WorkerError {
 }
 
 export type SAM2WorkerResult = SAM2WorkerSuccess | SAM2WorkerError;
-
-
-export interface EncodedImage {
-  
-  high_res_feats_0: Tensor;
-  
-  high_res_feats_1: Tensor;
-  
-  image_embed: Tensor;
-
-}

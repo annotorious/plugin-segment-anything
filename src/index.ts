@@ -6,7 +6,7 @@ import type { SAM2WorkerResult } from './sam2';
 import { canvasToFloat32Array, maskToPolygon, prepareSAM2Canvas } from './utils';
 import { createInputMarkerCanvas } from './input-marker-canvas';
 import { createPreviewCanvas } from './preview-canvas';
-import type { LabeledPoint, SAM2DecoderInput, SAMPluginOpts } from './types';
+import type { Point, SAM2DecoderInput, SAMPluginOpts } from './types';
 
 import './index.css';
 
@@ -50,7 +50,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
     }
   }
 
-  const debouncedPreview = pDebounce((pt: LabeledPoint) => {
+  const debouncedPreview = pDebounce((pt: Point) => {
     SAM2.postMessage({ type: 'decode_preview', point: pt });
   }, 1);
 
@@ -72,7 +72,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
       if (input.include.length + input.exclude.length > 0) return;
       
       const { x, y } = viewportToSAM2Coordinates(evt);  
-      debouncedPreview({ x, y, label: 1 });
+      debouncedPreview({ x, y });
     }
 
     onPointerDown = (evt: PointerEvent) => {
@@ -98,21 +98,21 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
     SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
       const { type } = message.data;
   
-      if (type === 'init_complete') {
+      if (type === 'init_success') {
         // Models loaded - encode the image
         console.log('[annotorious-sam] Encoding image...');
 
         const data = canvasToFloat32Array(bufferedImage);
-        SAM2.postMessage({ type: 'encode_image', data });
-      } else if (type === 'encoding_complete') {
+        SAM2.postMessage({ type: 'encode', data });
+      } else if (type === 'encode_success') {
         console.log('[annotorious-sam] Encoding complete');
 
         // Image encoded – add pointer listeners
         updateEventListeners();
-      } else if (type === 'preview_complete') {
+      } else if (type === 'decode_preview_success') {
         // Render mask every time the worker has decoded one
         previewCanvas?.renderMask(message.data.result);
-      } else if (type === 'decoding_complete') {
+      } else if (type === 'decode_success') {
         // Render mask every time the worker has decoded one
         const polygon = maskToPolygon(message.data.result, bounds, scale);
 
