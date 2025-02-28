@@ -7,7 +7,7 @@ import type { Point } from '@/types';
 import { createPreviewCanvas } from './osd-preview-canvas';
 import { createPluginState } from './osd-plugin-state';
 
-import '../index.css';
+import './index.css';
 
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   
