@@ -5,6 +5,7 @@ import { canvasToFloat32Array } from '@/utils';
 import { onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
 import type { Point } from '@/types';
 import { createPreviewCanvas } from './osd-preview-canvas';
+import { createPromptMarkerCanvas } from './osd-prompt-marker-canvas';
 import { createPluginState } from './osd-plugin-state';
 
 import './index.css';
@@ -15,7 +16,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   const state = createPluginState();
 
-  const preview = createPreviewCanvas(anno.viewer );
+  const preview = createPreviewCanvas(anno.viewer);
+
+  const markers = createPromptMarkerCanvas(anno.viewer);
 
   const viewportToSAM2Coordinates = (pt: Point) => {
     const { isSAMReady, sam } = state;
@@ -68,6 +71,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
         exclude: (state.sam.currentPrompt?.exclude || []),
       }
     }
+
+    const { currentPrompt, currentBounds, currentScale } = state.sam;
+    markers.setPrompt(currentPrompt, currentBounds, currentScale);
 
     SAM2.postMessage({ type: 'decode', prompt: state.sam.currentPrompt });
   }
