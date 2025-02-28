@@ -9,10 +9,10 @@ let previewBusy = false;
 
 let pendingPreview: Point | null = null;
 
-const decodePreview = (point: Point) => {
+const decodePreview = (point: Point): Promise<void> => {
   previewBusy = true;
 
-  SAM2.decode({ 
+  return SAM2.decode({ 
     include: [point], 
     exclude: [] 
   }).then(result => {
@@ -21,7 +21,10 @@ const decodePreview = (point: Point) => {
     self.postMessage({ type: 'error', error });
   }).finally(() => {
     if (pendingPreview) {
-      decodePreview(pendingPreview);
+      const pt = pendingPreview;
+      pendingPreview = null;
+
+      return decodePreview(pt);
     } else {
       previewBusy = false;
     }
@@ -48,9 +51,9 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
   } else if (type === 'decode_preview') {
     if (previewBusy) {
       // Keep last point to resolve later
+      // console.log('rejecting and buffering');
       pendingPreview = e.data.point;
     } else {
-      // Resolve now
       decodePreview(e.data.point);
     }
   } else if (type === 'decode') {
