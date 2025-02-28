@@ -1,5 +1,5 @@
-import type { Point, SAM2DecoderInput } from '@/types';
 import type { InferenceSession } from 'onnxruntime-web';
+import type { Point, SAM2DecoderInput } from '@/types';
 
 /** 
  * Command: initialize the SAM2 instance.
@@ -18,6 +18,8 @@ interface SAM2WorkerInitCommand {
 interface SAM2WorkerEncodeCommand {
 
   type: 'encode';
+
+  viewportVersion?: number;
 
   data: {
     
@@ -75,6 +77,8 @@ interface SAM2WorkerEncodeSuccess {
 
   type: 'encode_success';
 
+  viewportVersion?: number;
+
 }
 
 /**
@@ -88,18 +92,41 @@ interface SAM2WorkerDecodeSuccess {
 
 }
 
-type SAM2WorkerSuccess = 
+export type SAM2WorkerSuccess = 
   SAM2WorkerInitSuccess | 
   SAM2WorkerEncodeSuccess | 
   SAM2WorkerDecodeSuccess;
 
 /** Error **/
-interface SAM2WorkerError {
+interface SAM2WorkerInitError {
 
-  type: 'error';
+  type: 'init_error';
 
   error: any;
 
 }
+
+interface SAM2WorkerEncodeError {
+
+  type: 'encode_error';
+
+  error: any;
+
+  viewportVersion?: number;
+
+}
+
+interface SAM2WorkerDecodeError {
+
+  type: 'decode_error';
+
+  error: any;
+  
+}
+
+export type SAM2WorkerError =
+  SAM2WorkerInitError |
+  SAM2WorkerEncodeError |
+  SAM2WorkerDecodeError;
 
 export type SAM2WorkerResult = SAM2WorkerSuccess | SAM2WorkerError;

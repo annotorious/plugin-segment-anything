@@ -11,8 +11,6 @@ export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) =
   const renderMask = (result: InferenceSession.ReturnType) => {
     if (!_visible) return;
 
-    console.log('creating preview');
-
     const canvas = maskToCanvas(
       result, 
       bounds,

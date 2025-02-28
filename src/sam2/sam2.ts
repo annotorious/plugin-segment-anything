@@ -8,7 +8,7 @@ export const createSAM2 = (): SAM2 => {
   let encoder: InferenceSession | null = null;
   let decoder: InferenceSession | null = null;
 
-  let encodingBusy = true;
+  let encodingBusy = false;
   let decodingBusy = false;
 
   let encodedImage: EncodedImage | null = null;
@@ -20,11 +20,10 @@ export const createSAM2 = (): SAM2 => {
     ]).then(models => 
       Promise.all(models.map(m => getORTSession(m)))
     ).then(([enc, dec]) => {
-      console.log('[annotorious-sam] Models loaded')
       encoder = enc;
       decoder = dec;
     }).catch((error) => {
-      console.error('[annotorious-sam] Initialization failed:', error);
+      console.error('[a9s-sam] Initialization failed:', error);
       throw error;
     });
 
@@ -35,8 +34,9 @@ export const createSAM2 = (): SAM2 => {
     });
   
   const encodeImage = (input: Tensor): Promise<void> => {
-    if (!encoder) throw new Error('[annotorious-sam] Encoder not initialized');
+    if (!encoder) throw '[a9s-sam] Encoder not initialized';
 
+    if (encodingBusy) throw '[a9s-sam] Encoder busy';
     encodingBusy = true;
 
     const started = performance.now();
@@ -47,7 +47,7 @@ export const createSAM2 = (): SAM2 => {
     return encoder.run({ 
       image: input
     }).then(result => {
-      console.log(`[annotorious-sam] Encoded image (${performance.now() - started})`);
+      console.log(`[a9s-sam] Encoding took ${Math.round(performance.now() - started)}ms`);
 
       encodedImage = {
         high_res_feats_0: result[outputNames[0]],
@@ -57,8 +57,9 @@ export const createSAM2 = (): SAM2 => {
 
       encodingBusy = false;
     }).catch(error => {
-      console.error('[annotorious-sam] Encoding failed:', error);
+      console.error(error);
       encodingBusy = false;
+      throw 'Encoding failed'; 
     });
   }
   
@@ -108,7 +109,7 @@ export const createSAM2 = (): SAM2 => {
       decodingBusy = false;
       return result;
     }).catch(error => {
-      console.error('[annotorious-sam] Decoding failed', error);
+      console.error(error);
       decodingBusy = false;
       throw error;
     });    

@@ -19,13 +19,13 @@ export const loadModel = async (url: string): Promise<ArrayBuffer> => {
     });
 
   if (handle) {
-    console.log(`[annotorious-sam] Loading cached model: ${filename}`);
     const file = await handle.getFile();
+    console.log(`[a9s-sam] Cached: ${filename.substring(0, filename.indexOf('.'))}`);
     if (file.size > 0) return await file.arrayBuffer();
   }
 
   try {
-    console.log(`[annotorious-sam] Downloading: ${filename}`);
+    console.log(`[a9s-sam] Downloading ${filename}`);
     const buffer = await fetch(url).then(res => res.arrayBuffer());
 
     const fileHandle = await root.getFileHandle(filename, { create: true });
@@ -38,6 +38,6 @@ export const loadModel = async (url: string): Promise<ArrayBuffer> => {
     return buffer;
   } catch (error) {
     console.error(error);
-    throw new Error(`[annotorious-sam] Download failed: ${url}`);
+    throw new Error(`Download failed: ${url}`);
   }
 }

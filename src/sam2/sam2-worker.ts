@@ -37,17 +37,21 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
   if (type === 'init') {
     SAM2.init()
       .then(() => self.postMessage({ type: 'init_success' }))
-      .catch(error => self.postMessage({ type: 'error', error }))
+      .catch(error => self.postMessage({ type: 'init_error', error }));
+
   } else if (type === 'encode') {
-    const { float32Array, shape } = e.data.data;
-    
+    const { data: { float32Array, shape }, viewportVersion } = e.data;
+    console.log(`[a9s-sam] Encoding${viewportVersion ? ` - ${viewportVersion}` : ''}`);
+
     SAM2.encodeImage(
       new Tensor('float32', float32Array, shape)
     ).then(() => {
-      self.postMessage({ type: 'encode_success' })
+      self.postMessage({ type: 'encode_success', viewportVersion })
     }).catch(error => {
-      self.postMessage({ type: 'error', error });
+      console.log(`[annotorious-sam] Encoding failed ${viewportVersion || ''}`);
+      self.postMessage({ type: 'encode_error', error, viewportVersion });
     });
+
   } else if (type === 'decode_preview') {
     if (previewBusy) {
       // Keep last point to resolve later
@@ -56,10 +60,12 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
     } else {
       decodePreview(e.data.point);
     }
+
   } else if (type === 'decode') {
     SAM2.decode(e.data.input)
       .then(result => self.postMessage({ type: 'decode_success', result }))
-      .catch(error => self.postMessage({ type: 'error', error }));
+      .catch(error => self.postMessage({ type: 'decode_error', error }));
+
   }
 }
 

@@ -1,4 +1,4 @@
-export const onImageLoaded = (viewer: OpenSeadragon.Viewer, callback: () => void) => {
+export const onFullyLoaded = (viewer: OpenSeadragon.Viewer, callback: () => void) => {
 
   viewer.addHandler('open', event => {
     const itemCount = viewer.world.getItemCount();
