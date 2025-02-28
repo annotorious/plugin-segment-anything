@@ -47,6 +47,10 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   const onCanvasClick = (evt: OpenSeadragon.CanvasClickEvent) => {
     if (!state.sam || !state.isSAMReady || !state.isOSDReady) return;
 
+    // 'quick' differentiates clicks from drag-and-release, see:
+    // https://github.com/openseadragon/openseadragon/issues/198#issuecomment-25388782
+    if (!evt.quick) return;
+
     const orig = evt.originalEvent as PointerEvent;
     const pt = { x: orig.offsetX, y: orig.offsetY };
 
