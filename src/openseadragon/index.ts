@@ -1,8 +1,9 @@
 import type { OpenSeadragonAnnotator } from '@annotorious/openseadragon';
+import { v4 as uuidv4 } from 'uuid';
 import type { SAM2WorkerResult } from '@/sam2';
 import SAM2Worker from '@/sam2/sam2-worker.ts?worker';
 import { canvasToFloat32Array } from '@/utils';
-import { onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
+import { maskToAnnotation, onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
 import type { Point } from '@/types';
 import { createPreviewCanvas } from './osd-preview-canvas';
 import { createPromptMarkerCanvas } from './osd-prompt-marker-canvas';
@@ -38,6 +39,10 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   const onPointerMove = (evt: PointerEvent) => {
     if (!state.isSAMReady || !state.isOSDReady) return;
 
+    // No previews if there is already a prompt
+    const hasPrompt = Boolean(state.sam?.currentPrompt)
+    if (hasPrompt) return;
+
     const pt = { x: evt.offsetX, y: evt.offsetY };
 
     if (state.isAnimationInProgress) {
@@ -53,6 +58,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     // 'quick' differentiates clicks from drag-and-release, see:
     // https://github.com/openseadragon/openseadragon/issues/198#issuecomment-25388782
     if (!evt.quick) return;
+
+    if (state.isAnimationInProgress) return;
 
     const orig = evt.originalEvent as PointerEvent;
     const pt = { x: orig.offsetX, y: orig.offsetY };
@@ -98,6 +105,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   const onAnimationStart = () => {
     state.isAnimationInProgress = true;
 
+    state.sam = undefined;
+
     preview.clear();
     markers.clear();
   }
@@ -110,9 +119,17 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     // We'll prepare a new SAM working canvas every time the OSD animation finishes
     const { canvas, bounds, scale } = prepareOsdSamCanvas(viewer.drawer.canvas as HTMLCanvasElement);
     state.sam = {
+      // The current 1024 x 1024 SAM working canvas
       currentCanvas: canvas,
+
+      // The bbox of the resized & padded viewport on the working canvas
       currentBounds: bounds,
-      currentScale: scale
+
+      // The current SAM scale (longer image dimension / 1024)
+      currentScale: scale,
+
+      // New annotation ID for the current shape
+      currentAnnotationId: uuidv4()
     }
 
     if (state.isSAMReady) encodeCurrentViewport();
@@ -166,8 +183,21 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
           console.log('[a9s-sam] Stale preview - discarding');
       }
     } else if (type === 'decode_success') {
-      // TODO
-      console.log('DECODED', message.data);
+      preview.clear();
+
+      if (state.sam) {
+        const annotation = maskToAnnotation(message.data.result, state.sam, anno.getUser(), viewer);
+        const { store } = anno.state;
+
+        const exists = store.getAnnotation(state.sam.currentAnnotationId);
+        if (exists) {
+          console.log('updating annotation');
+          store.updateAnnotation(state.sam.currentAnnotationId, annotation);
+        } else {
+          console.log('adding annotation');
+          store.addAnnotation(annotation);
+        }
+      }
     } else if (type === 'encode_error') {
       const { viewportVersion } = message.data;
       if (viewportVersion === state.viewportVersion) {

@@ -1,6 +1,6 @@
 import type { Bounds, Point, SAM2DecoderPrompt } from '@/types';
 
-interface OSDPluginState {
+export interface OSDPluginState {
 
   isSAMReady: boolean;
 
@@ -12,17 +12,21 @@ interface OSDPluginState {
 
   lastPointerPos?: Point;
 
-  sam?: {
+  sam?: OSDSAMState
 
-    currentCanvas: HTMLCanvasElement;
+}
 
-    currentScale: number;
+export interface OSDSAMState {
 
-    currentBounds: Bounds;
+  currentCanvas: HTMLCanvasElement;
 
-    currentPrompt?: SAM2DecoderPrompt;
+  currentScale: number;
 
-  }
+  currentBounds: Bounds;
+
+  currentAnnotationId: string;
+
+  currentPrompt?: SAM2DecoderPrompt;
 
 }
 
