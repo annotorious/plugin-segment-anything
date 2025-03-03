@@ -90,6 +90,8 @@ interface SAM2WorkerDecodeSuccess {
 
   result: InferenceSession.ReturnType;
 
+  viewportVersion?: number;
+
 }
 
 export type SAM2WorkerSuccess = 

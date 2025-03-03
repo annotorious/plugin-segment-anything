@@ -24,9 +24,9 @@ export interface SAM2 {
 
   init(): Promise<void>;
 
-  encodeImage(input: Tensor): Promise<void>;
+  encodeImage(input: Tensor, viewportVersion?: number): Promise<void>;
 
-  decode(input: SAM2DecoderPrompt): Promise<InferenceSession.OnnxValueMapType>;
+  decode(input: SAM2DecoderPrompt): Promise<{ result: InferenceSession.OnnxValueMapType, viewportVersion?: number }>;
 
 }
 

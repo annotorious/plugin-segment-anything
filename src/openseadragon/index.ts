@@ -97,7 +97,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   const onAnimationStart = () => {
     state.isAnimationInProgress = true;
+
     preview.clear();
+    markers.clear();
   }
 
   const onAnimationFinish =  () => {
@@ -156,8 +158,13 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
       }
     } else if (type === 'decode_preview_success') {
       // Render mask every time the worker has decoded one
-      if (state.sam && !state.isAnimationInProgress)
-        preview.render(message.data.result, state.sam.currentBounds);
+      if (state.sam && !state.isAnimationInProgress) {
+        const { result, viewportVersion } = message.data;
+        if (viewportVersion === state.viewportVersion)
+          preview.render(result, state.sam.currentBounds);
+        else 
+          console.log('[a9s-sam] Stale preview - discarding');
+      }
     } else if (type === 'decode_success') {
       // TODO
       console.log('DECODED', message.data);

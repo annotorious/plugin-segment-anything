@@ -8,8 +8,8 @@ export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
   canvas.setAttribute('class', 'a9s-sam a9s-osd-prompt-markers');
 
   const drawPoint = (pt: Point, bounds: Bounds, scale: number, color: string) => {
-    const x = MARKER_RADIUS * (pt.x - bounds.x) * scale;
-    const y = MARKER_RADIUS * (pt.y - bounds.y) * scale;
+    const x = (pt.x - bounds.x) * scale;
+    const y = (pt.y - bounds.y) * scale;
 
     ctx.beginPath();
     ctx.arc(x, y, 5 * MARKER_RADIUS, 0, 2 * Math.PI, false);

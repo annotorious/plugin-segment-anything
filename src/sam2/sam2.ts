@@ -11,6 +11,8 @@ export const createSAM2 = (): SAM2 => {
   let encodingBusy = false;
   let decodingBusy = false;
 
+  let currentViewportVersion: number | undefined = null;
+
   let encodedImage: EncodedImage | null = null;
 
   const init = (): Promise<void> =>
@@ -33,7 +35,7 @@ export const createSAM2 = (): SAM2 => {
       logSeverityLevel: 3
     });
   
-  const encodeImage = (input: Tensor): Promise<void> => {
+  const encodeImage = (input: Tensor, viewportVersion?: number): Promise<void> => {
     if (!encoder) throw '[a9s-sam] Encoder not initialized';
 
     if (encodingBusy) throw '[a9s-sam] Encoder busy';
@@ -55,6 +57,8 @@ export const createSAM2 = (): SAM2 => {
         image_embed: result[outputNames[2]],
       };
 
+      currentViewportVersion = viewportVersion;
+
       encodingBusy = false;
     }).catch(error => {
       console.error(error);
@@ -63,7 +67,9 @@ export const createSAM2 = (): SAM2 => {
     });
   }
   
-  const decode = (prompt: SAM2DecoderPrompt): Promise<InferenceSession.OnnxValueMapType> => {
+  const decode = (
+    prompt: SAM2DecoderPrompt
+  ): Promise<{ result: InferenceSession.OnnxValueMapType, viewportVersion?: number }> => {
     // System ready - encoder and decoder initialized, image encoded
     const ready = decoder && encoder && encodedImage;
     if (!ready) return Promise.reject('SAM2 not ready');
@@ -107,7 +113,7 @@ export const createSAM2 = (): SAM2 => {
 
     return decoder!.run(inputs).then(result => {
       decodingBusy = false;
-      return result;
+      return { result, viewportVersion: currentViewportVersion };
     }).catch(error => {
       console.error(error);
       decodingBusy = false;

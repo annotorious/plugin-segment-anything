@@ -15,8 +15,8 @@ const decodePreview = (point: Point): Promise<void> => {
   return SAM2.decode({ 
     include: [point], 
     exclude: [] 
-  }).then(result => {
-    self.postMessage({ type: 'decode_preview_success', result });
+  }).then(({ result, viewportVersion }) => {
+    self.postMessage({ type: 'decode_preview_success', result, viewportVersion });
   }).catch(error => {
     self.postMessage({ type: 'error', error });
   }).finally(() => {
@@ -44,7 +44,8 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
     console.log(`[a9s-sam] Encoding${viewportVersion ? ` - ${viewportVersion}` : ''}`);
 
     SAM2.encodeImage(
-      new Tensor('float32', float32Array, shape)
+      new Tensor('float32', float32Array, shape),
+      viewportVersion
     ).then(() => {
       self.postMessage({ type: 'encode_success', viewportVersion })
     }).catch(error => {
@@ -63,9 +64,8 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
 
   } else if (type === 'decode') {
     SAM2.decode(e.data.prompt)
-      .then(result => self.postMessage({ type: 'decode_success', result }))
+      .then(({ result, viewportVersion }) => self.postMessage({ type: 'decode_success', result, viewportVersion }))
       .catch(error => self.postMessage({ type: 'decode_error', error }));
-
   }
 }
 
