@@ -153,11 +153,11 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   }
 
   const removeHandlers = () => {
-    viewer.element.removeEventListener('pointermove', onPointerMove);
-    viewer.element.removeEventListener('pointerdown', onPointerDown);
+    viewer.element?.removeEventListener('pointermove', onPointerMove);
+    viewer.element?.removeEventListener('pointerdown', onPointerDown);
 
-    viewer.removeHandler('animation-start', onAnimationStart);
-    viewer.removeHandler('animation-finish', onAnimationFinish);
+    viewer?.removeHandler('animation-start', onAnimationStart);
+    viewer?.removeHandler('animation-finish', onAnimationFinish);
   }
 
   const setEnabled = (enabled: boolean) => {
