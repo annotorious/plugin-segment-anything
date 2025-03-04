@@ -187,6 +187,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
       if (state.sam) {
         const annotation = maskToAnnotation(message.data.result, state.sam, anno.getUser(), viewer);
+        console.log(annotation);
+
         const { store } = anno.state;
 
         const exists = store.getAnnotation(state.sam.currentAnnotationId);

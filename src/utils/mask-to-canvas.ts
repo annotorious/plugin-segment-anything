@@ -45,5 +45,16 @@ export const maskToCanvas = (
     bounds.h + 2 * bounds.y
   );
 
+  /*
+  resized.style.position = 'absolute';
+  resized.style.top = '0';
+  resized.style.left = '0';
+  resized.style.width = '100%';
+  resized.style.height = '100%';
+  resized.style.opacity = '0.5';
+  resized.style.pointerEvents = 'none';
+  document.body.appendChild(resized);
+  */
+
   return resized;
 }
