@@ -67,7 +67,11 @@ export const maskToAnnotation = (
 
   // Polygon points mapped to OSD image coordinate space
   const points: [number, number][] = detectContours(resized).map(pt => {
-    const { x, y } = viewer.viewport.viewerElementToImageCoordinates(new OpenSeadragon.Point(pt[0], pt[1]));
+    // Note that–for unknown reasons–will return [0, 0] when used in a consuming application
+    // that provides its own OpenSeadragon import
+    // viewer.viewport.viewerElementToImageCoordinates(pt[0], pt[1]);
+    const viewportPt = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(pt[0], pt[1]));
+    const {x, y} = viewer.viewport.viewportToImageCoordinates(viewportPt.x, viewportPt.y);
     return [x, y]
   });
 
