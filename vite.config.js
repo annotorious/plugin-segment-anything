@@ -31,11 +31,11 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      entry: './src/index.ts',
-      name: 'AnnotoriousSAM',
-      formats: ['es', 'umd'],
-      fileName: (format) => 
-        format === 'umd' ? `annotorious-plugin-sam.js` : `annotorious-plugin-sam.es.js` 
+      entry: {
+        'index': './src/index.ts',
+        'openseadragon/index': './src/openseadragon/index.ts'
+      },
+      formats: ['es']
     },
     rollupOptions: {
       output: {

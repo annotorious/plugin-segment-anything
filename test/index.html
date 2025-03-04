@@ -24,7 +24,6 @@
 
     <div id="openseadragon"></div>
 
-
     <script type="module">
       import OpenSeadragon from 'openseadragon';
       import { createOSDAnnotator } from '@annotorious/openseadragon';
@@ -40,7 +39,8 @@
           gestureSettingsMouse: {
             clickToZoom: false
           },
-          tileSources: 'https://iiif.bodleian.ox.ac.uk/iiif/image/60b986f3-a97f-48be-9400-a1ee389659ac/info.json'
+          // tileSources: 'https://iiif.bodleian.ox.ac.uk/iiif/image/60b986f3-a97f-48be-9400-a1ee389659ac/info.json'
+          tileSources: 'https://iiif.bodleian.ox.ac.uk/iiif/image/b5c11542-8550-4831-ad39-77f503721aec/info.json'
         });
 
         const anno = createOSDAnnotator(viewer, {

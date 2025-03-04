@@ -14,7 +14,7 @@
       "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "sourceMap": true,
     "target": "ESNext",
     "verbatimModuleSyntax": true

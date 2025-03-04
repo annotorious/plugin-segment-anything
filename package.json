@@ -14,6 +14,7 @@
     "url": "https://github.com/annotorious/plugin-segment-anything/issues"
   },
   "scripts": {
+    "prepare": "npm run build",
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -27,9 +28,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/annotorious-plugin-sam.js",
-      "require": "./dist/annotorious-plugin-sam.js"
+      "import": "./dist/index.js"
     },
+    "./openseadragon": "./dist/openseadragon/index.js",
     "./annotorious-plugin-smart-tools.css": "./dist/annotorious-plugin-sam.css"
   },
   "devDependencies": {
