@@ -41,13 +41,15 @@
     "vite-plugin-dts": "^4.5.1",
     "vite-plugin-static-copy": "^2.3.0"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@annotorious/annotorious": "^3.1.4",
     "@annotorious/openseadragon": "^3.1.4",
+    "openseadragon": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
     "@techstark/opencv-js": "^4.10.0-release.1",
     "nanoevents": "^9.1.0",
     "onnxruntime-web": "^1.20.1",
-    "openseadragon": "^5.0.1",
     "p-debounce": "^4.0.0",
     "uuid": "^11.1.0"
   }
