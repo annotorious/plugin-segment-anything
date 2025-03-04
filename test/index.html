@@ -16,13 +16,14 @@
       }
     </style>
   </head>
-  <body>
-    <div id="openseadragon">
-      <div class="buttons" style="position:absolute; top: 10px; right: 10px; z-index: 1;">
-        <button id="mode">Move</button>
-        <button id="sam" disabled>Smart Select</button>
-      </div>
+  <body>    
+    <div class="buttons" style="position:absolute; top: 10px; right: 10px; z-index: 1;">
+      <button id="mode">Move</button>
+      <button id="sam" disabled>Smart Select</button>
     </div>
+
+    <div id="openseadragon"></div>
+
 
     <script type="module">
       import OpenSeadragon from 'openseadragon';
@@ -72,8 +73,10 @@
         const samBtn = document.getElementById('sam');
         samBtn.addEventListener('click', function() {
           if (samBtn.innerHTML === 'Smart Select') {
+            modeBtn.disabled = true;
             plugin.setEnabled(true);
-          } else if (samBtn.innerHTML === 'Stop Smart Select') {
+          } else if (samBtn.innerHTML === 'Confirm Selection') {
+            modeBtn.disabled = undefined;
             plugin.setEnabled(false);
             samBtn.innerHTML = 'Smart Select';
           }
@@ -89,7 +92,7 @@
         });
 
         plugin.on('encodingComplete', () => {
-          samBtn.innerHTML = 'Stop Smart Select';
+          samBtn.innerHTML = 'Confirm Selection';
         });
       }
     </script>

@@ -51,29 +51,24 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
     const pt = { x: evt.offsetX, y: evt.offsetY };
 
-    if (state.isAnimationInProgress) {
-      state.lastPointerPos = pt;
-    } else {
+    state.lastPointerPos = pt;
+
+    if (!state.isAnimationInProgress) {
       decodePreview(pt);
     }
   }
 
-  const onCanvasClick = (evt: OpenSeadragon.CanvasClickEvent) => {
+  const onPointerDown = (evt: PointerEvent) => {
     if (!state.sam || !state.isSAMReady || !state.isOSDReady) return;
-
-    // 'quick' differentiates clicks from drag-and-release, see:
-    // https://github.com/openseadragon/openseadragon/issues/198#issuecomment-25388782
-    if (!evt.quick) return;
 
     if (state.isAnimationInProgress) return;
 
-    const orig = evt.originalEvent as PointerEvent;
-    const pt = { x: orig.offsetX, y: orig.offsetY };
+    const pt = { x: evt.offsetX, y: evt.offsetY };
 
     const translated = viewportToSAM2Coordinates(pt);
     if (!translated) return;
 
-    if (orig.shiftKey) {
+    if (evt.shiftKey) {
       state.sam.currentPrompt = {
         include: (state.sam.currentPrompt?.include || []),
         exclude: [...(state.sam.currentPrompt?.exclude || []), translated]
@@ -151,18 +146,18 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   const addHandlers = () => {
     viewer.element.addEventListener('pointermove', onPointerMove);
+    viewer.element.addEventListener('pointerdown', onPointerDown);
 
     viewer.addHandler('animation-start', onAnimationStart);
     viewer.addHandler('animation-finish', onAnimationFinish);
-    viewer.addHandler('canvas-click', onCanvasClick);
   }
 
   const removeHandlers = () => {
     viewer.element.removeEventListener('pointermove', onPointerMove);
+    viewer.element.removeEventListener('pointerdown', onPointerDown);
 
     viewer.removeHandler('animation-start', onAnimationStart);
     viewer.removeHandler('animation-finish', onAnimationFinish);
-    viewer.removeHandler('canvas-click', onCanvasClick);
   }
 
   const setEnabled = (enabled: boolean) => {
@@ -171,12 +166,16 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     state.sam = undefined;
 
     if (enabled) {
+      viewer.setMouseNavEnabled(false);
+
       preview.show();
       markers.show();
 
       addHandlers();
       onAnimationFinish();
     } else {
+      viewer.setMouseNavEnabled(true);
+
       preview.hide();
       markers.hide();
 
@@ -216,26 +215,23 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
       // Render mask every time the worker has decoded one
       if (state.sam && !state.isAnimationInProgress) {
         const { result, viewportVersion } = message.data;
-        if (viewportVersion === state.viewportVersion)
+
+        if (viewportVersion === state.viewportVersion) {
           preview.render(result, state.sam.currentBounds);
-        else 
+        } else {
           console.log('[a9s-sam] Stale preview - discarding');
+        }
       }
     } else if (type === 'decode_success') {
       preview.clear();
 
       if (state.sam) {
         const annotation = maskToAnnotation(message.data.result, state.sam, anno.getUser(), viewer);
-        console.log(annotation);
-
         const { store } = anno.state;
-
         const exists = store.getAnnotation(state.sam.currentAnnotationId);
         if (exists) {
-          console.log('updating annotation');
           store.updateAnnotation(state.sam.currentAnnotationId, annotation);
         } else {
-          console.log('adding annotation');
           store.addAnnotation(annotation);
         }
       }

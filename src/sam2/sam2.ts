@@ -36,9 +36,9 @@ export const createSAM2 = (): SAM2 => {
     });
   
   const encodeImage = (input: Tensor, viewportVersion?: number): Promise<void> => {
-    if (!encoder) throw '[a9s-sam] Encoder not initialized';
+    if (!encoder) return Promise.reject('[a9s-sam] Encoder not initialized');
 
-    if (encodingBusy) throw '[a9s-sam] Encoder busy';
+    if (encodingBusy) return Promise.reject('[a9s-sam] Encoder busy');
     encodingBusy = true;
 
     const started = performance.now();

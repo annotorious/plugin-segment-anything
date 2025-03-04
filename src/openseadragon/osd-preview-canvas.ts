@@ -30,6 +30,8 @@ export const createPreviewCanvas = (viewer: OpenSeadragon.Viewer) => {
   }
 
   const hide = () => {
+    clear();
+    
     // Temporary
     canvas.style.display = 'none';
   }

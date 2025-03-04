@@ -35,6 +35,8 @@ export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
   }
 
   const hide = () => {
+    clear();
+    
     // Temporary
     canvas.style.display = 'none';
   }
