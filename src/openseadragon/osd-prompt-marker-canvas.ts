@@ -7,6 +7,9 @@ export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
   const { canvas, ctx } = createOverlayCanvas(viewer);
   canvas.setAttribute('class', 'a9s-sam a9s-osd-prompt-markers');
 
+  // Hidden by default
+  canvas.style.display = 'none';
+
   const drawPoint = (pt: Point, bounds: Bounds, scale: number, color: string) => {
     const x = (pt.x - bounds.x) * scale;
     const y = (pt.y - bounds.y) * scale;
@@ -26,6 +29,16 @@ export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
     prompt.exclude.forEach(pt => drawPoint(pt, bounds, scale, '#ff3333'));
   }
 
+  const show = () => {
+    // Temporary
+    canvas.style.display = null;
+  }
+
+  const hide = () => {
+    // Temporary
+    canvas.style.display = 'none';
+  }
+
   const clear = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
@@ -37,7 +50,9 @@ export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
   return {
     clear,
     destroy,
-    setPrompt
+    hide,
+    setPrompt,
+    show
   }
 
 }

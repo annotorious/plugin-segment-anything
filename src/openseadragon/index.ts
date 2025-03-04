@@ -1,10 +1,11 @@
 import type { OpenSeadragonAnnotator } from '@annotorious/openseadragon';
 import { v4 as uuidv4 } from 'uuid';
+import { createNanoEvents } from 'nanoevents'
 import type { SAM2WorkerResult } from '@/sam2';
 import SAM2Worker from '@/sam2/sam2-worker.ts?worker';
 import { canvasToFloat32Array } from '@/utils';
 import { maskToAnnotation, onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
-import type { Point } from '@/types';
+import type { SAMPluginEvents, Point } from '@/types';
 import { createPreviewCanvas } from './osd-preview-canvas';
 import { createPromptMarkerCanvas } from './osd-prompt-marker-canvas';
 import { createPluginState } from './osd-plugin-state';
@@ -14,6 +15,11 @@ import './index.css';
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   
   const { viewer } = anno;
+
+  // Plugin is disabled by default
+  let _enabled = false;
+
+  const emitter = createNanoEvents<SAMPluginEvents>();
 
   const state = createPluginState();
 
@@ -88,6 +94,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   const encodeCurrentViewport = () => {
     if (!state.sam) return;
 
+    emitter.emit('startEncoding');
+
     // Increment viewport version
     state.viewportVersion += 1;
 
@@ -114,7 +122,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   const onAnimationFinish =  () => {
     state.isAnimationInProgress = false;
 
-    if (!state.isOSDReady) return;
+    if (!state.isOSDReady || !_enabled) return;
 
     // We'll prepare a new SAM working canvas every time the OSD animation finishes
     const { canvas, bounds, scale } = prepareOsdSamCanvas(viewer.drawer.canvas as HTMLCanvasElement);
@@ -141,18 +149,45 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     onAnimationFinish();
   });
 
-  viewer.element.addEventListener('pointermove', onPointerMove);
+  const addHandlers = () => {
+    viewer.element.addEventListener('pointermove', onPointerMove);
 
-  viewer.addHandler('animation-start', onAnimationStart);
-  viewer.addHandler('animation-finish', onAnimationFinish);
-  viewer.addHandler('canvas-click', onCanvasClick);
+    viewer.addHandler('animation-start', onAnimationStart);
+    viewer.addHandler('animation-finish', onAnimationFinish);
+    viewer.addHandler('canvas-click', onCanvasClick);
+  }
 
-  const destroy = () => {
+  const removeHandlers = () => {
     viewer.element.removeEventListener('pointermove', onPointerMove);
 
     viewer.removeHandler('animation-start', onAnimationStart);
     viewer.removeHandler('animation-finish', onAnimationFinish);
     viewer.removeHandler('canvas-click', onCanvasClick);
+  }
+
+  const setEnabled = (enabled: boolean) => {
+    _enabled = enabled;
+
+    state.sam = undefined;
+
+    if (enabled) {
+      preview.show();
+      markers.show();
+
+      addHandlers();
+      onAnimationFinish();
+    } else {
+      preview.hide();
+      markers.hide();
+
+      removeHandlers();
+    }
+  }
+
+  const destroy = () => {
+    preview.destroy();
+    markers.destroy();
+    removeHandlers();
   }
 
   const SAM2 = new SAM2Worker();
@@ -163,15 +198,19 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     if (type === 'init_success') {
       // SAM has loaded models and initialized encoder & decoder
       state.isSAMReady = true;
-      encodeCurrentViewport();
+      emitter.emit('initialized');
+
+      if (_enabled) encodeCurrentViewport();
     } else if (type === 'encode_success') {
       // New viewport encoding ready
       const { viewportVersion } = message.data;
 
       if (viewportVersion! < state.viewportVersion) {
         console.log('[a9s-sam] Stale encoding - discarding');
-      } else if (state.lastPointerPos) {
-        decodePreview(state.lastPointerPos);
+      } else {
+        emitter.emit('encodingComplete');
+
+        if (state.lastPointerPos) decodePreview(state.lastPointerPos);
       }
     } else if (type === 'decode_preview_success') {
       // Render mask every time the worker has decoded one
@@ -211,7 +250,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   SAM2.postMessage({ type: 'init' });
 
   return {
-    destroy
+    destroy,
+    setEnabled,
+    on: emitter.on.bind(emitter)
   }
 
 }

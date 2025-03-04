@@ -20,6 +20,7 @@
     <div id="openseadragon">
       <div class="buttons" style="position:absolute; top: 10px; right: 10px; z-index: 1;">
         <button id="mode">Move</button>
+        <button id="sam" disabled>Smart Select</button>
       </div>
     </div>
 
@@ -42,7 +43,6 @@
         });
 
         const anno = createOSDAnnotator(viewer, {
-          theme: 'dark',
           drawingEnabled: false,
           drawingMode: 'drag',
           style: {
@@ -60,13 +60,36 @@
 
         const modeBtn = document.getElementById('mode');
         modeBtn.addEventListener('click', function() {
-          if (modeBtn.innerHTML == 'Move') {
+          if (modeBtn.innerHTML === 'Move') {
             anno.setDrawingEnabled(true);
             modeBtn.innerHTML = 'Draw';
           } else {
             anno.setDrawingEnabled(false);
             modeBtn.innerHTML = 'Move';
           }
+        });
+
+        const samBtn = document.getElementById('sam');
+        samBtn.addEventListener('click', function() {
+          if (samBtn.innerHTML === 'Smart Select') {
+            plugin.setEnabled(true);
+          } else if (samBtn.innerHTML === 'Stop Smart Select') {
+            plugin.setEnabled(false);
+            samBtn.innerHTML = 'Smart Select';
+          }
+        });
+
+        plugin.on('initialized', () => {
+          // Enable SAM button
+          samBtn.disabled = undefined;
+        });
+
+        plugin.on('startEncoding', () => {
+          samBtn.innerHTML = 'Please wait... encoding viewport';
+        });
+
+        plugin.on('encodingComplete', () => {
+          samBtn.innerHTML = 'Stop Smart Select';
         });
       }
     </script>

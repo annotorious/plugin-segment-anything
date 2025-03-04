@@ -8,6 +8,16 @@ export interface SAMPluginOpts {
 
 }
 
+export interface SAMPluginEvents  {
+
+  initialized: () => void;
+
+  startEncoding: () => void;
+
+  encodingComplete: () => void;
+
+}
+
 export interface Point {
 
   x: number;

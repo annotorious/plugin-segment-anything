@@ -8,6 +8,9 @@ export const createPreviewCanvas = (viewer: OpenSeadragon.Viewer) => {
   const { canvas, ctx } = createOverlayCanvas(viewer);
   canvas.setAttribute('class', 'a9s-sam a9s-osd-sam-preview');
 
+  // Hidden by default
+  canvas.style.display = 'none';
+
   const render = (result: InferenceSession.ReturnType, bounds: Bounds) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -21,6 +24,16 @@ export const createPreviewCanvas = (viewer: OpenSeadragon.Viewer) => {
     ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
   }
 
+  const show = () => {
+    // Temporary
+    canvas.style.display = null;
+  }
+
+  const hide = () => {
+    // Temporary
+    canvas.style.display = 'none';
+  }
+
   const clear = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
@@ -32,7 +45,9 @@ export const createPreviewCanvas = (viewer: OpenSeadragon.Viewer) => {
   return {
     clear,
     destroy,
-    render
+    hide,
+    render,
+    show
   }
 
 }
