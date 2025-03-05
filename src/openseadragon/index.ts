@@ -193,11 +193,6 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
 
-  const resetQuery = () => {
-    state.sam.currentPrompt = undefined;
-    markers.clear();
-  }
-
   const start = () => {
     _enabled = true;
     state.sam = undefined;
@@ -224,6 +219,14 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   const restart = () => {
     stop();
     start();
+  }
+
+  // Reset is just a restart, but also removes the current annotation
+  const reset = () => {
+    if (state.sam)
+      anno.removeAnnotation(state.sam.currentAnnotationId);
+    
+    restart();
   }
 
   const destroy = () => {
@@ -290,7 +293,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   return {
     destroy,
-    resetQuery,
+    reset,
     restart,
     setQueryMode,
     start,

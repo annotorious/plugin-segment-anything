@@ -10,7 +10,7 @@ export const maskToPolygon = (
   bounds: Bounds,
   scale: number
 ) => {
-  const canvas = maskToCanvas(
+  const { canvas } = maskToCanvas(
     result, 
     bounds,
     [255, 255, 255, 255],

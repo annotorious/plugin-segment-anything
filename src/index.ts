@@ -11,8 +11,9 @@ import type { Point, SAM2DecoderPrompt, SAMPluginOpts } from './types';
 import './index.css';
 
 export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
-  let _enabled = Boolean(opts.enabled);
-  let _showPreview = Boolean(opts.showPreview);
+  let _enabled = false;
+  
+  let _showPreview = true;
 
   let currentAnnotationId: string;
 
