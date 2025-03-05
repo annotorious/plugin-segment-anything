@@ -164,3 +164,5 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   }
 
 }
+
+export * from './types';

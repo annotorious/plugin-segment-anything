@@ -19,6 +19,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   // Plugin is disabled by default
   let _enabled = false;
 
+  // Add or remove points
+  let _queryMode: 'add' | 'remove' = 'add';
+
   const emitter = createNanoEvents<SAMPluginEvents>();
 
   const state = createPluginState();
@@ -68,7 +71,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     const translated = viewportToSAM2Coordinates(pt);
     if (!translated) return;
 
-    if (evt.shiftKey) {
+    if (evt.shiftKey || _queryMode === 'remove') {
       state.sam.currentPrompt = {
         include: (state.sam.currentPrompt?.include || []),
         exclude: [...(state.sam.currentPrompt?.exclude || []), translated]
@@ -183,6 +186,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     }
   }
 
+  const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
+
   const destroy = () => {
     preview.destroy();
     markers.destroy();
@@ -248,7 +253,10 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
   return {
     destroy,
     setEnabled,
-    on: emitter.on.bind(emitter)
+    setQueryMode,
+    on: (event: keyof SAMPluginEvents, cb: SAMPluginEvents[keyof SAMPluginEvents]) => emitter.on(event, cb)
   }
 
 }
+
+export * from '../types';
