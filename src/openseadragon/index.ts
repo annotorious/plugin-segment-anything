@@ -83,6 +83,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     const { currentPrompt, currentBounds, currentScale } = state.sam;
     markers.setPrompt(currentPrompt, currentBounds, currentScale);
 
+    emitter.emit('promptChanged', currentPrompt);
+
     SAM2.postMessage({ type: 'decode', prompt: state.sam.currentPrompt });
   }
 
@@ -118,7 +120,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     // Increment viewport version
     state.viewportVersion += 1;
 
-    emitter.emit('startEncoding');
+    emitter.emit('encodingStart');
 
     // Post data to worker
     const data = canvasToFloat32Array(state.sam.currentCanvas);
@@ -137,7 +139,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     // Technically, not quite true... but in terms of UX,
     // user interfaces will want to start signalling activity
     // as soon as the viewport changes.
-    emitter.emit('startEncoding');
+    emitter.emit('animationStart');
 
     state.sam = undefined;
 
@@ -147,6 +149,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   const onAnimationFinish =  () => {
     state.isAnimationInProgress = false;
+
+    emitter.emit('animationStart');
 
     if (!state.isOSDReady || !_enabled) return;
 
@@ -197,6 +201,10 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   const start = () => {
     _enabled = true;
+
+    if (state.sam?.currentPrompt)
+      emitter.emit('promptChanged', undefined);
+    
     state.sam = undefined;
 
     preview.show();
@@ -255,7 +263,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       if (viewportVersion! < state.viewportVersion) {
         console.log('[a9s-sam] Stale encoding - discarding');
       } else {
-        emitter.emit('encodingComplete');
+        emitter.emit('encodingFinished');
 
         if (state.lastPointerPos) decodePreview(state.lastPointerPos);
       }

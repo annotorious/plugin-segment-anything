@@ -8,11 +8,17 @@ export interface SAMPluginOpts {
 
 export interface SAMPluginEvents  {
 
+  animationFinished: () => void;
+
+  animationStart: () => void;
+
+  encodingFinished: () => void;
+
+  encodingStart: () => void;
+
   initialized: () => void;
 
-  startEncoding: () => void;
-
-  encodingComplete: () => void;
+  promptChanged: (prompt?: SAM2DecoderPrompt) =>  void;
 
 }
 
