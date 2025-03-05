@@ -74,10 +74,10 @@
         samBtn.addEventListener('click', function() {
           if (samBtn.innerHTML === 'Smart Select') {
             modeBtn.disabled = true;
-            plugin.setEnabled(true);
+            plugin.start();
           } else if (samBtn.innerHTML === 'Confirm Selection') {
             modeBtn.disabled = undefined;
-            plugin.setEnabled(false);
+            plugin.stop();
             samBtn.innerHTML = 'Smart Select';
           }
         });

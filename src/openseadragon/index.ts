@@ -166,29 +166,39 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     viewer?.removeHandler('animation-finish', onAnimationFinish);
   }
 
-  const setEnabled = (enabled: boolean) => {
-    _enabled = enabled;
+  const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
 
-    state.sam = undefined;
-
-    if (enabled) {
-      preview.show();
-      markers.show();
-
-      addHandlers();
-      onAnimationFinish();
-    } else {
-      // Re-enable mouse nave
-      viewer.setMouseNavEnabled(true);
-
-      preview.hide();
-      markers.hide();
-
-      removeHandlers();
-    }
+  const resetQuery = () => {
+    state.sam.currentPrompt = undefined;
   }
 
-  const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
+  const start = () => {
+    _enabled = true;
+    state.sam = undefined;
+
+    preview.show();
+    markers.show();
+
+    addHandlers();
+    onAnimationFinish();
+  }
+
+  const stop = () => {
+    _enabled = false;
+
+    // Re-enable mouse nave
+    viewer.setMouseNavEnabled(true);
+
+    preview.hide();
+    markers.hide();
+
+    removeHandlers();
+  }
+
+  const restart = () => {
+    stop();
+    start();
+  }
 
   const destroy = () => {
     preview.destroy();
@@ -254,8 +264,11 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   return {
     destroy,
-    setEnabled,
+    resetQuery,
+    restart,
     setQueryMode,
+    start,
+    stop,
     on: (event: keyof SAMPluginEvents, cb: SAMPluginEvents[keyof SAMPluginEvents]) => emitter.on(event, cb)
   }
 
