@@ -66,6 +66,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
     if (state.isAnimationInProgress) return;
 
+    // Stop mouse nav as soon as the first query point is set
+    viewer.setMouseNavEnabled(false);
+
     const pt = { x: evt.offsetX, y: evt.offsetY };
 
     const translated = viewportToSAM2Coordinates(pt);
@@ -169,14 +172,13 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     state.sam = undefined;
 
     if (enabled) {
-      viewer.setMouseNavEnabled(false);
-
       preview.show();
       markers.show();
 
       addHandlers();
       onAnimationFinish();
     } else {
+      // Re-enable mouse nave
       viewer.setMouseNavEnabled(true);
 
       preview.hide();
