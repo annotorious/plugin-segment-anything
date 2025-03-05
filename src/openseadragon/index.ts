@@ -118,6 +118,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     // Increment viewport version
     state.viewportVersion += 1;
 
+    emitter.emit('startEncoding');
+
     // Post data to worker
     const data = canvasToFloat32Array(state.sam.currentCanvas);
     SAM2.postMessage({ type: 'encode', data, viewportVersion: state.viewportVersion });
