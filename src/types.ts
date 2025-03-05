@@ -2,9 +2,7 @@ import type { InferenceSession, Tensor } from 'onnxruntime-web/all';
 
 export interface SAMPluginOpts {
 
-  enabled?: boolean;
-
-  showPreview?: boolean;
+  maxPreviewCoverage?: number;
 
 }
 

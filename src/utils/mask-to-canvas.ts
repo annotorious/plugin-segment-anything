@@ -21,7 +21,7 @@ export const maskToCanvas = (
   const bestMaskIdx = maskScores.indexOf(Math.max(...maskScores));
 
   // HTML canvas, 256x256 px
-  const bestMask = float32ArrayToCanvas(
+  const { canvas: bestMask, ratio } = float32ArrayToCanvas(
     sliceTensor(maskTensors, bestMaskIdx), 
     width, 
     height,
@@ -56,5 +56,12 @@ export const maskToCanvas = (
   document.body.appendChild(resized);
   */
 
-  return resized;
+  // The `ratio` returned by `float32ArrayToCanvas` represents
+  // relative percentage of foreground pixels on the mask. However,
+  // The mask is for the padded image. Therefore, for the true
+  // ratio of VISIBLE foreground pixels, we also need to take the
+  // image bounds into account.
+  const boundsRatio = (bounds.w * bounds.h) / (1024 * 1024);
+
+  return { canvas: resized, ratio: ratio / boundsRatio };
 }

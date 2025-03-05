@@ -10,9 +10,14 @@ export const float32ArrayToCanvas = (
   const C = 4; // 4 output channels, RGBA
   const imageData = new Uint8ClampedArray(array.length * C);
 
+  let foregroundPixelCount = 0;
+
   for (let srcIdx = 0; srcIdx < array.length; srcIdx++) {
     const trgIdx = srcIdx * C;
     const maskedPx = array[srcIdx] > 0;
+
+    if (maskedPx)
+      foregroundPixelCount++;
 
     const color = maskedPx ? foreground : background;
 
@@ -32,5 +37,8 @@ export const float32ArrayToCanvas = (
   ctx.imageSmoothingEnabled = false;
   ctx.putImageData(new ImageData(imageData, width, height), 0, 0);
 
-  return canvas;
+  // Ratio foreground to total pixels
+  const ratio = foregroundPixelCount / array.length;
+
+  return { canvas, ratio };
 }

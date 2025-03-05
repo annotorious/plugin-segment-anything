@@ -43,7 +43,7 @@ export const maskToAnnotation = (
   viewer: OpenSeadragon.Viewer
 ) => {
   // SAM mask as B/W canvas, 256 x 256 px
-  const mask = maskToCanvas(result);
+  const { canvas: mask } = maskToCanvas(result);
 
   const { offsetWidth: w, offsetHeight: h } = viewer.element;
 

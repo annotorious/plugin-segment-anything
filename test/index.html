@@ -52,7 +52,9 @@
           }
         });
 
-        const plugin = mountOpenSeadragonPlugin(anno);
+        const plugin = mountOpenSeadragonPlugin(anno, {
+          maxPreviewCoverage: 0.3
+        });
 
         anno.on('createAnnotation', () => {
           modeBtn.innerHTML = 'Move';

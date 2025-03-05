@@ -5,14 +5,14 @@ import type { SAM2WorkerResult } from '@/sam2';
 import SAM2Worker from '@/sam2/sam2-worker.ts?worker';
 import { canvasToFloat32Array } from '@/utils';
 import { maskToAnnotation, onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
-import type { SAMPluginEvents, Point } from '@/types';
+import type { SAMPluginEvents, Point, SAMPluginOpts } from '@/types';
 import { createPreviewCanvas } from './osd-preview-canvas';
 import { createPromptMarkerCanvas } from './osd-prompt-marker-canvas';
 import { createPluginState } from './osd-plugin-state';
 
 import './index.css';
 
-export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
+export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAMPluginOpts = {}) => {
   
   const { viewer } = anno;
 
@@ -26,7 +26,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   const state = createPluginState();
 
-  const preview = createPreviewCanvas(anno.viewer);
+  const preview = createPreviewCanvas(anno.viewer, opts);
 
   const markers = createPromptMarkerCanvas(anno.viewer);
 
@@ -61,14 +61,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     }
   }
 
-  const onPointerDown = (evt: PointerEvent) => {
-    if (!state.sam || !state.isSAMReady || !state.isOSDReady) return;
-
-    if (state.isAnimationInProgress) return;
-
-    // Stop mouse nav as soon as the first query point is set
-    viewer.setMouseNavEnabled(false);
-
+  // Common code for onCanvasClick and onPointerDown
+  const handlePointerDown = (evt: PointerEvent) => {
     const pt = { x: evt.offsetX, y: evt.offsetY };
 
     const translated = viewportToSAM2Coordinates(pt);
@@ -92,10 +86,34 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
     SAM2.postMessage({ type: 'decode', prompt: state.sam.currentPrompt });
   }
 
+  const onCanvasClick = (evt: OpenSeadragon.CanvasClickEvent) => {
+    // Ignore drag
+    if (!evt.quick) return;
+
+    // Ignore if SAM or OSD are not ready
+    if (!state.sam || !state.isSAMReady || !state.isOSDReady) return;
+
+    // Ignore if animation is in progress
+    if (state.isAnimationInProgress) return;
+
+    // Stop mouse nav as soon as the users sets the first query point
+    viewer.setMouseNavEnabled(false);
+
+    handlePointerDown(evt.originalEvent as PointerEvent);
+  }
+
+  const onPointerDown = (evt: PointerEvent) => {
+    if (viewer.isMouseNavEnabled()) return;
+
+    // Note: we rely on `onCanvasClick` since it already provides
+    // the logic to differentiate between click and drag. But once
+    // `setMouseNavEnabled` is set to `false`, `onCanvasClick` is no
+    // longer triggered, and we use onPointerDown instead.
+    handlePointerDown(evt);
+  }
+
   const encodeCurrentViewport = () => {
     if (!state.sam) return;
-
-    emitter.emit('startEncoding');
 
     // Increment viewport version
     state.viewportVersion += 1;
@@ -113,6 +131,11 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
   const onAnimationStart = () => {
     state.isAnimationInProgress = true;
+
+    // Technically, not quite true... but in terms of UX,
+    // user interfaces will want to start signalling activity
+    // as soon as the viewport changes.
+    emitter.emit('startEncoding');
 
     state.sam = undefined;
 
@@ -156,6 +179,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
     viewer.addHandler('animation-start', onAnimationStart);
     viewer.addHandler('animation-finish', onAnimationFinish);
+    viewer.addHandler('canvas-click', onCanvasClick);
   }
 
   const removeHandlers = () => {
@@ -164,12 +188,14 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator) => {
 
     viewer?.removeHandler('animation-start', onAnimationStart);
     viewer?.removeHandler('animation-finish', onAnimationFinish);
+    viewer?.removeHandler('canvas-click', onCanvasClick);
   }
 
   const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
 
   const resetQuery = () => {
     state.sam.currentPrompt = undefined;
+    markers.clear();
   }
 
   const start = () => {
