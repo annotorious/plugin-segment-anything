@@ -2,7 +2,7 @@ import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { SAM2, SAM2DecoderPrompt, EncodedImage } from '@/types';
 import { loadModel } from './utils';
 
-const BASE_PATH = 'https://github.com/annotorious/plugin-segment-anything/raw/refs/heads/main/models/';
+const BASE_PATH = 'https://cdn.jsdelivr.net/gh/annotorious/plugin-segment-anything/models';
 
 // Ported to TS from geronimi73 – MIT license
 // See https://github.com/geronimi73/next-sam/blob/main/app/SAM2.js
