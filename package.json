@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/plugin-segment-anything",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A smart polygon selection tool based on SegmentAnything 2",
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
@@ -14,7 +14,6 @@
     "url": "https://github.com/annotorious/plugin-segment-anything/issues"
   },
   "scripts": {
-    "prepare": "npm run build",
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview"
