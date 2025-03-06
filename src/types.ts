@@ -18,6 +18,8 @@ export interface SAMPluginEvents  {
 
   initialized: () => void;
 
+  initError: (error: any) => void;
+
   promptChanged: (prompt?: SAM2DecoderPrompt) =>  void;
 
 }

@@ -18,7 +18,7 @@ const decodePreview = (point: Point): Promise<void> => {
   }).then(({ result, viewportVersion }) => {
     self.postMessage({ type: 'decode_preview_success', result, viewportVersion });
   }).catch(error => {
-    self.postMessage({ type: 'error', error });
+    self.postMessage({ type: 'decode_preview_error', error });
   }).finally(() => {
     if (pendingPreview) {
       const pt = pendingPreview;

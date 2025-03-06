@@ -291,11 +291,19 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
           store.addAnnotation(annotation);
         }
       }
+    } else if (type === 'init_error') {
+      const { error } = message.data;
+      emitter.emit('initError', error);
+
     } else if (type === 'encode_error') {
       const { viewportVersion } = message.data;
-      if (viewportVersion === state.viewportVersion) {
+
+      if (viewportVersion === state.viewportVersion)
         setTimeout(() => encodeCurrentViewport(), 100);
-      }
+    } else if (type === 'decode_preview_error') {
+      // Do nothing...
+    } else if (type === 'decode_error') {
+      // Do nothing...
     }
   });
 

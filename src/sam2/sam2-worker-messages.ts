@@ -118,17 +118,26 @@ interface SAM2WorkerEncodeError {
 
 }
 
-interface SAM2WorkerDecodeError {
+interface SAM2WorkerDecodePreviewError {
 
-  type: 'decode_error';
+  type: 'decode_preview_error';
 
   error: any;
   
 }
 
+interface SAM2WorkerDecodeError {
+
+  type: 'decode_error';
+
+  error: any;
+
+}
+
 export type SAM2WorkerError =
   SAM2WorkerInitError |
   SAM2WorkerEncodeError |
+  SAM2WorkerDecodePreviewError |
   SAM2WorkerDecodeError;
 
 export type SAM2WorkerResult = SAM2WorkerSuccess | SAM2WorkerError;
