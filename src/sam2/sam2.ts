@@ -2,9 +2,11 @@ import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { SAM2, SAM2DecoderPrompt, EncodedImage } from '@/types';
 import { loadModel } from './utils';
 
+const BASE_PATH = ''; // https://github.com/annotorious/plugin-segment-anything/raw/refs/heads/main/models/';
+
 // Ported to TS from geronimi73 – MIT license
 // See https://github.com/geronimi73/next-sam/blob/main/app/SAM2.js
-export const createSAM2 = (): SAM2 => {
+export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
   let encoder: InferenceSession | null = null;
   let decoder: InferenceSession | null = null;
 
@@ -17,8 +19,8 @@ export const createSAM2 = (): SAM2 => {
 
   const init = (): Promise<void> =>
     Promise.all([
-      loadModel('/sam2_hiera_tiny_encoder.with_runtime_opt.ort'),
-      loadModel('/sam2_hiera_tiny_decoder_pr1.onnx')
+      loadModel(`${basePath}/sam2_hiera_tiny_encoder.with_runtime_opt.ort`),
+      loadModel(`${basePath}/sam2_hiera_tiny_decoder_pr1.onnx`)
     ]).then(models => 
       Promise.all(models.map(m => getORTSession(m)))
     ).then(([enc, dec]) => {

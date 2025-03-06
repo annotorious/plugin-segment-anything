@@ -21,7 +21,11 @@ export const loadModel = async (url: string): Promise<ArrayBuffer> => {
   if (handle) {
     const file = await handle.getFile();
     console.log(`[a9s-sam] Cached: ${filename.substring(0, filename.indexOf('.'))}`);
-    if (file.size > 0) return await file.arrayBuffer();
+    if (file.size > 10000000) 
+      return await file.arrayBuffer();
+    else 
+      // Something's off - delete this file
+      root.removeEntry(filename);
   }
 
   try {
@@ -30,7 +34,7 @@ export const loadModel = async (url: string): Promise<ArrayBuffer> => {
 
     const fileHandle = await root.getFileHandle(filename, { create: true });
 
-    console.log(`[annotorious-sam] Writing to cache`);
+    console.log(`[a9s-sam] Writing to cache`);
     const writable = await fileHandle.createWritable();
     await writable.write(buffer);
     await writable.close();
