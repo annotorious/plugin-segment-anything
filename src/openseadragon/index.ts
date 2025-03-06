@@ -217,7 +217,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   const stop = () => {
     _enabled = false;
 
-    // Re-enable mouse nave
+    // Re-enable mouse nav
     viewer.setMouseNavEnabled(true);
 
     preview.hide();

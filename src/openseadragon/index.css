@@ -5,3 +5,7 @@ canvas.a9s-sam {
   width: 100%;
   height: 100%;
 }
+
+canvas.a9s-sam.a9s-osd-sam-preview {
+  filter: blur(1px);
+}

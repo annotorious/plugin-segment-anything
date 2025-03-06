@@ -17,8 +17,8 @@ export const createPreviewCanvas = (viewer: OpenSeadragon.Viewer, opts: SAMPlugi
     const { canvas: mask, ratio } = maskToCanvas(
       result, 
       bounds,
-      [0, 114, 189, 255],
-      [0, 0, 0, 0]
+      [0, 0, 0, 0],
+      [0, 0, 0, 100]
     );
 
     const maxRatio = opts.maxPreviewCoverage || 1;
