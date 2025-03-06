@@ -33,7 +33,8 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
 
   const getORTSession = (model: ArrayBuffer): Promise<InferenceSession> =>
     InferenceSession.create(model, {
-      executionProviders: ['webgpu', 'cpu'],
+      // In theory CPU fallback is possible, but really doesn't make sense in practice
+      executionProviders: ['webgpu' /*, 'cpu' */],
       logSeverityLevel: 3
     });
   
