@@ -1,3 +1,4 @@
+import type { ImageAnnotation } from '@annotorious/annotorious';
 import type { InferenceSession, Tensor } from 'onnxruntime-web/all';
 
 export interface SAMPluginOpts {
@@ -12,6 +13,10 @@ export interface SAMPluginEvents  {
 
   animationStart: () => void;
 
+  createAnnotation: (annotation: ImageAnnotation, prompt: SAM2DecoderPrompt) => void;
+
+  deleteAnnotation: (annotation: ImageAnnotation) => void;
+
   encodingFinished: () => void;
 
   encodingStart: () => void;
@@ -20,7 +25,7 @@ export interface SAMPluginEvents  {
 
   initError: (error: any) => void;
 
-  promptChanged: (prompt?: SAM2DecoderPrompt) =>  void;
+  updateAnnotation: (annotation: ImageAnnotation, previous: ImageAnnotation, prompt: SAM2DecoderPrompt) => void;
 
 }
 

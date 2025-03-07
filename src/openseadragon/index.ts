@@ -80,10 +80,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       }
     }
 
-    const { currentPrompt, currentBounds, currentScale } = state.sam;
+    const { currentPrompt, currentBounds, currentScale, currentAnnotationId } = state.sam;
     markers.setPrompt(currentPrompt, currentBounds, currentScale);
-
-    emitter.emit('promptChanged', currentPrompt);
 
     SAM2.postMessage({ type: 'decode', prompt: state.sam.currentPrompt });
   }
@@ -147,14 +145,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     markers.clear();
   }
 
-  const onAnimationFinish =  () => {
-    state.isAnimationInProgress = false;
-
-    emitter.emit('animationStart');
-
-    if (!state.isOSDReady || !_enabled) return;
-
-    // We'll prepare a new SAM working canvas every time the OSD animation finishes
+  const prepareState = () => {
     const { canvas, bounds, scale } = prepareOsdSamCanvas(viewer.drawer.canvas as HTMLCanvasElement);
     state.sam = {
       // The current 1024 x 1024 SAM working canvas
@@ -169,8 +160,29 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       // New annotation ID for the current shape
       currentAnnotationId: uuidv4()
     }
+  }
+
+  const onAnimationFinish =  () => {
+    state.isAnimationInProgress = false;
+
+    emitter.emit('animationStart');
+
+    if (!state.isOSDReady || !_enabled) return;
+
+    prepareState();
 
     if (state.isSAMReady) encodeCurrentViewport();
+  }
+
+  const start = () => {
+    _enabled = true;
+    
+    preview.show();
+    markers.show();
+
+    addHandlers();
+    
+    if (!state.sam) prepareState();
   }
 
   onFullyLoaded(viewer, () => {
@@ -199,21 +211,6 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
 
-  const start = () => {
-    _enabled = true;
-
-    if (state.sam?.currentPrompt)
-      emitter.emit('promptChanged', undefined);
-    
-    state.sam = undefined;
-
-    preview.show();
-    markers.show();
-
-    addHandlers();
-    onAnimationFinish();
-  }
-
   const stop = () => {
     _enabled = false;
 
@@ -233,8 +230,13 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   // Reset is just a restart, but also removes the current annotation
   const reset = () => {
-    if (state.sam)
-      anno.removeAnnotation(state.sam.currentAnnotationId);
+    if (state.sam) {
+      const existing = anno.state.store.getAnnotation(state.sam.currentAnnotationId);
+      if (existing) {
+        anno.removeAnnotation(state.sam.currentAnnotationId);
+        emitter.emit('deleteAnnotation', existing);
+      }
+    }
     
     restart();
   }
@@ -283,12 +285,16 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
       if (state.sam) {
         const annotation = maskToAnnotation(message.data.result, state.sam, anno.getUser(), viewer);
+
         const { store } = anno.state;
-        const exists = store.getAnnotation(state.sam.currentAnnotationId);
-        if (exists) {
+        const previous = store.getAnnotation(state.sam.currentAnnotationId);
+
+        if (previous) {
           store.updateAnnotation(state.sam.currentAnnotationId, annotation);
+          emitter.emit('updateAnnotation', annotation, previous, state.sam.currentPrompt);
         } else {
           store.addAnnotation(annotation);
+          emitter.emit('createAnnotation', annotation, state.sam.currentPrompt);          
         }
       }
     } else if (type === 'init_error') {
