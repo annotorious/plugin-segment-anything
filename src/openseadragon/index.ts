@@ -184,7 +184,12 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
     addHandlers();
     
-    if (!state.sam) {
+    if (state.sam) {
+      // User didn't change the viewport–just reset prompt 
+      // and annotation ID, but no need to recompute the encoding
+      state.sam.currentPrompt = undefined;
+      state.sam.currentAnnotationId = uuidv4();
+    } else {
       prepareState();
       if (state.isSAMReady) encodeCurrentViewport();
     }

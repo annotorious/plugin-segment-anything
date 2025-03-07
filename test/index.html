@@ -76,6 +76,7 @@
         samBtn.addEventListener('click', function() {
           if (samBtn.innerHTML === 'Smart Select') {
             modeBtn.disabled = true;
+            samBtn.innerHTML = 'Confirm Selection';
             plugin.start();
           } else if (samBtn.innerHTML === 'Confirm Selection') {
             modeBtn.disabled = undefined;
