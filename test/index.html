@@ -89,11 +89,12 @@
           samBtn.disabled = undefined;
         });
 
-        plugin.on('startEncoding', () => {
+        plugin.on('encodingStart', () => {
+          console.log('startEncoding');
           samBtn.innerHTML = 'Please wait... encoding viewport';
         });
 
-        plugin.on('encodingComplete', () => {
+        plugin.on('encodingFinished', () => {
           samBtn.innerHTML = 'Confirm Selection';
         });
       }

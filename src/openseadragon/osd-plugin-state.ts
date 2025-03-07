@@ -10,6 +10,8 @@ export interface OSDPluginState {
 
   viewportVersion: number;
 
+  lastEncodingVersion?: number;
+
   lastPointerPos?: Point;
 
   sam?: OSDSAMState

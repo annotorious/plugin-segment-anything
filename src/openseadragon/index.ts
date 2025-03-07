@@ -126,6 +126,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   }
 
   const decodePreview = (pt: Point) => {
+    if (state.lastEncodingVersion !== state.viewportVersion) return;
+    
     const translated = viewportToSAM2Coordinates(pt);
     if (translated)
       SAM2.postMessage({ type: 'decode_preview', point: translated });
@@ -182,7 +184,10 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
     addHandlers();
     
-    if (!state.sam) prepareState();
+    if (!state.sam) {
+      prepareState();
+      if (state.isSAMReady) encodeCurrentViewport();
+    }
   }
 
   onFullyLoaded(viewer, () => {
@@ -261,6 +266,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     } else if (type === 'encode_success') {
       // New viewport encoding ready
       const { viewportVersion } = message.data;
+
+      state.lastEncodingVersion = viewportVersion;
 
       if (viewportVersion! < state.viewportVersion) {
         console.log('[a9s-sam] Stale encoding - discarding');
