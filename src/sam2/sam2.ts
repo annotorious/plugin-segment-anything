@@ -39,6 +39,8 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
     });
   
   const encodeImage = (input: Tensor, viewportVersion?: number): Promise<void> => {
+    encodedImage = undefined;
+    
     if (!encoder) return Promise.reject('[a9s-sam] Encoder not initialized');
 
     if (encodingBusy) return Promise.reject('[a9s-sam] Encoder busy');
@@ -63,8 +65,8 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
       currentViewportVersion = viewportVersion;
 
       encodingBusy = false;
-    }).catch(error => {
-      console.error(error);
+    }).catch(() => {
+      // Usually happens if the session has already started
       encodingBusy = false;
       throw 'Encoding failed'; 
     });
@@ -79,7 +81,7 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
 
     // Encoding or decoding in progress?
     const busy = encodingBusy || decodingBusy;
-    if (busy) return Promise.reject('SAM2 busy');
+    if (busy || !encodedImage) return Promise.reject('SAM2 busy');
 
     decodingBusy = true;
 
@@ -98,6 +100,8 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
       new Float32Array(256 * 256),
       [1, 1, 256, 256]
     );
+
+
 
     const inputs = {
       ...encodedImage,

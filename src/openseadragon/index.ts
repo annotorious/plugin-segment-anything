@@ -133,20 +133,6 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       SAM2.postMessage({ type: 'decode_preview', point: translated });
   }
 
-  const onAnimationStart = () => {
-    state.isAnimationInProgress = true;
-
-    // Technically, not quite true... but in terms of UX,
-    // user interfaces will want to start signalling activity
-    // as soon as the viewport changes.
-    emitter.emit('animationStart');
-
-    state.sam = undefined;
-
-    preview.clear();
-    markers.clear();
-  }
-
   const prepareState = () => {
     const { canvas, bounds, scale } = prepareOsdSamCanvas(viewer.drawer.canvas as HTMLCanvasElement);
     state.sam = {
@@ -164,6 +150,20 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     }
   }
 
+  const onAnimationStart = () => {
+    state.isAnimationInProgress = true;
+    state.sam = undefined;
+
+    // Technically, not quite true... but in terms of UX,
+    // user interfaces will want to start signalling activity
+    // as soon as the viewport changes.
+    emitter.emit('animationStart');
+
+    preview.clear();
+    markers.clear();
+  }
+
+
   const onAnimationFinish =  () => {
     state.isAnimationInProgress = false;
 
@@ -171,7 +171,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
     if (!state.isOSDReady || !_enabled) return;
 
-    prepareState();
+    if (_enabled) prepareState();
 
     if (state.isSAMReady) encodeCurrentViewport();
   }
@@ -182,7 +182,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     preview.show();
     markers.show();
 
-    addHandlers();
+    addPointerHandlers();
     
     if (state.sam) {
       // User didn't change the viewport–just reset prompt 
@@ -201,21 +201,17 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     onAnimationFinish();
   });
 
-  const addHandlers = () => {
+  const addPointerHandlers = () => {
     viewer.element.addEventListener('pointermove', onPointerMove);
     viewer.element.addEventListener('pointerdown', onPointerDown);
 
-    viewer.addHandler('animation-start', onAnimationStart);
-    viewer.addHandler('animation-finish', onAnimationFinish);
     viewer.addHandler('canvas-click', onCanvasClick);
   }
 
-  const removeHandlers = () => {
+  const removePointerHandlers = () => {
     viewer.element?.removeEventListener('pointermove', onPointerMove);
     viewer.element?.removeEventListener('pointerdown', onPointerDown);
 
-    viewer?.removeHandler('animation-start', onAnimationStart);
-    viewer?.removeHandler('animation-finish', onAnimationFinish);
     viewer?.removeHandler('canvas-click', onCanvasClick);
   }
 
@@ -230,7 +226,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     preview.hide();
     markers.hide();
 
-    removeHandlers();
+    removePointerHandlers();
   }
 
   const restart = () => {
@@ -251,10 +247,16 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     restart();
   }
 
+  viewer.addHandler('animation-start', onAnimationStart);
+  viewer.addHandler('animation-finish', onAnimationFinish);
+
   const destroy = () => {
     preview.destroy();
     markers.destroy();
-    removeHandlers();
+    removePointerHandlers();
+
+    viewer?.removeHandler('animation-start', onAnimationStart);
+    viewer?.removeHandler('animation-finish', onAnimationFinish);
   }
 
   const SAM2 = new SAM2Worker();
