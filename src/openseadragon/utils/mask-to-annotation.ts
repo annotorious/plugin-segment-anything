@@ -20,7 +20,6 @@ const maskToCanvas = (
   // Mask dimension will be 256x256 (by design of the SAM2 model)
   const [_, __, width, height] = maskTensors.dims;
 
-  // @ts-expect-error
   const maskScores = result.iou_predictions.cpuData;
   const bestMaskIdx = maskScores.indexOf(Math.max(...maskScores));
 

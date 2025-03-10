@@ -8,6 +8,5 @@ export const sliceTensor = (tensor: Tensor, idx: number) => {
   const start = stride * idx;
   const end = start + stride;
 
-  // @ts-expect-error
   return tensor.cpuData.slice(start, end);
 }
