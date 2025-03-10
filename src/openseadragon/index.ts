@@ -163,7 +163,6 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     markers.clear();
   }
 
-
   const onAnimationFinish =  () => {
     state.isAnimationInProgress = false;
 
