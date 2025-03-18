@@ -4,7 +4,7 @@ import type OpenSeadragon from 'openseadragon';
  * Creates a new canvas that tracks the size of the OpenSeadragon image canvas.
  */
 export const createOverlayCanvas = (viewer: OpenSeadragon.Viewer) => {
-  const container = viewer.element.querySelector('.openseadragon-canvas');
+  const container = viewer.element?.querySelector('.openseadragon-canvas');
   if (!container) throw '[a9s-sam] Error creating overlay canvas';
 
   const osdCanvas = viewer.drawer.canvas as HTMLCanvasElement;

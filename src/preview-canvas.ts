@@ -3,7 +3,7 @@ import { maskToCanvas } from './utils';
 import type { Bounds } from './types';
 
 export const createPreviewCanvas = (container: HTMLDivElement, bounds: Bounds) => {
-  const image = container.querySelector('img');
+  const image = container?.querySelector('img');
   if (!image) return;
 
   let _visible = true;
