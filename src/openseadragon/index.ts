@@ -26,9 +26,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   const state = createPluginState();
 
-  const preview = createPreviewCanvas(anno.viewer, opts);
+  let preview: ReturnType<typeof createPreviewCanvas>;
 
-  const markers = createPromptMarkerCanvas(anno.viewer);
+  let markers: ReturnType<typeof createPromptMarkerCanvas>;
 
   const viewportToSAM2Coordinates = (pt: Point) => {
     const { isSAMReady, sam } = state;
@@ -326,10 +326,16 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     }
   });
 
-  SAM2.postMessage({ type: 'init' });
+  const init = () => {
+    preview = createPreviewCanvas(viewer, opts);
+    markers = createPromptMarkerCanvas(viewer);
+
+    SAM2.postMessage({ type: 'init' });
+  }
 
   return {
     destroy,
+    init,
     reset,
     restart,
     setQueryMode,
