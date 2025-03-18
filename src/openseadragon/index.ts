@@ -13,7 +13,7 @@ import { createPluginState } from './osd-plugin-state';
 import './index.css';
 
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAMPluginOpts = {}) => {
-  
+
   const { viewer } = anno;
 
   // Plugin is disabled by default
@@ -80,7 +80,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       }
     }
 
-    const { currentPrompt, currentBounds, currentScale, currentAnnotationId } = state.sam;
+    const { currentPrompt, currentBounds, currentScale } = state.sam;
     markers.setPrompt(currentPrompt, currentBounds, currentScale);
 
     SAM2.postMessage({ type: 'decode', prompt: state.sam.currentPrompt });
@@ -220,7 +220,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     _enabled = false;
 
     // Re-enable mouse nav
-    viewer.setMouseNavEnabled(true);
+    viewer?.setMouseNavEnabled(true);
 
     preview.hide();
     markers.hide();
