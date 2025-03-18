@@ -16,6 +16,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   const { viewer } = anno;
 
+  let _initialized = false;
+
   // Plugin is disabled by default
   let _enabled = false;
 
@@ -176,6 +178,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   }
 
   const start = () => {
+    if (_initialized) init();
+
     _enabled = true;
     
     preview.show();
@@ -250,6 +254,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   viewer.addHandler('animation-finish', onAnimationFinish);
 
   const destroy = () => {
+    _initialized = false;
+    _enabled = false;
+
     preview.destroy();
     markers.destroy();
     removePointerHandlers();
@@ -327,10 +334,14 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   });
 
   const init = () => {
+    if (_initialized) return;
+
     preview = createPreviewCanvas(viewer, opts);
     markers = createPromptMarkerCanvas(viewer);
 
     SAM2.postMessage({ type: 'init' });
+    
+    _initialized = true;
   }
 
   return {
