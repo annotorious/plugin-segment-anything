@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/plugin-segment-anything",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "A smart polygon selection tool based on SegmentAnything 2",
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
