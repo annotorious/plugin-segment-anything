@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/plugin-segment-anything",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "A smart polygon selection tool based on SegmentAnything 2",
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
@@ -36,7 +36,7 @@
     "@types/node": "^22.13.10",
     "@types/openseadragon": "^3.0.10",
     "typescript": "^5.8.2",
-    "vite": "^6.2.1",
+    "vite": "^6.2.2",
     "vite-plugin-dts": "^4.5.3",
     "vite-plugin-static-copy": "^2.3.0"
   },
