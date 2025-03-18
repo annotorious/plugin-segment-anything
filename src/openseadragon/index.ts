@@ -161,8 +161,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     // as soon as the viewport changes.
     emitter.emit('animationStart');
 
-    preview.clear();
-    markers.clear();
+    preview?.clear();
+    markers?.clear();
   }
 
   const onAnimationFinish =  () => {
@@ -178,7 +178,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   }
 
   const start = () => {
-    if (_initialized) init();
+    if (!_initialized) init();
+
+    console.log('[a9s-sam] Starting plugin');
 
     _enabled = true;
     
@@ -199,7 +201,6 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   }
 
   onFullyLoaded(viewer, () => {
-    console.log('[a9s-sam] OSD canvas ready');
     state.isOSDReady = true;
     onAnimationFinish();
   });
@@ -221,13 +222,15 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   const setQueryMode = (mode: 'add' | 'remove') => _queryMode = mode;
 
   const stop = () => {
+    console.log('[a9s-sam] Stopping plugin');
+
     _enabled = false;
 
     // Re-enable mouse nav
     viewer?.setMouseNavEnabled(true);
 
-    preview.hide();
-    markers.hide();
+    preview?.hide();
+    markers?.hide();
 
     removePointerHandlers();
   }
@@ -254,11 +257,14 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   viewer.addHandler('animation-finish', onAnimationFinish);
 
   const destroy = () => {
+    console.log('[a9s-sam] Destroying plugin instance');
+
     _initialized = false;
     _enabled = false;
 
-    preview.destroy();
-    markers.destroy();
+    preview?.destroy();
+    markers?.destroy();
+
     removePointerHandlers();
 
     viewer?.removeHandler('animation-start', onAnimationStart);
@@ -336,12 +342,14 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   const init = () => {
     if (_initialized) return;
 
+    console.log('[a9s-sam] Initializing');
+
     preview = createPreviewCanvas(viewer, opts);
     markers = createPromptMarkerCanvas(viewer);
 
-    SAM2.postMessage({ type: 'init' });
-    
     _initialized = true;
+
+    SAM2.postMessage({ type: 'init' });
   }
 
   return {
