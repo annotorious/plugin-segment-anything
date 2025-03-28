@@ -1,15 +1,35 @@
+import { fetchWithProgress, type Progress } from './fetch-with-progress';
+
 const getFilename = (url: string): string => {
   const cleanUrl = url.split(/[?#]/)[0];
   return cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
 }
 
+export const isModelCached = async (url: string) => {
+  const root = await navigator.storage.getDirectory();
+  const filename = getFilename(url);
+  const handle = await root
+    .getFileHandle(filename)
+    .catch(() => { 
+      // Do nothing - expected if the file hasn't 
+      // yet been downloaded. 
+    });
+
+  return Boolean(handle);
+}
+
 /** 
  * Load a model file from cache or URL.
  */ 
-export const loadModel = async (url: string): Promise<ArrayBuffer> => {
+export const loadModel = async (
+  url: string,
+  onProgress?: (progress: Progress) => void
+): Promise<ArrayBuffer> => {
   const root = await navigator.storage.getDirectory();
 
   const filename = getFilename(url);
+
+  // root.removeEntry(filename);
 
   const handle = await root
     .getFileHandle(filename)
@@ -30,7 +50,7 @@ export const loadModel = async (url: string): Promise<ArrayBuffer> => {
 
   try {
     console.log(`[a9s-sam] Downloading ${filename}`);
-    const buffer = await fetch(url).then(res => res.arrayBuffer());
+    const buffer = await fetchWithProgress(url, onProgress);
 
     const fileHandle = await root.getFileHandle(filename, { create: true });
 

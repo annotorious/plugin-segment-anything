@@ -35,10 +35,15 @@ self.onmessage = (e: MessageEvent<SAM2WorkerCommand>) => {
   const { type } = e.data;
 
   if (type === 'init') {
-    SAM2.init()
+    SAM2.isModelCached()
+      .then(isCached => {
+        if (!isCached) self.postMessage({ type: 'starting_download' });
+      })
+      .then(() => SAM2.init(progress => {
+        self.postMessage({ type: 'download_progress', progress })
+      }))
       .then(() => self.postMessage({ type: 'init_success' }))
       .catch(error => self.postMessage({ type: 'init_error', error }));
-
   } else if (type === 'encode') {
     const { data: { float32Array, shape }, viewportVersion } = e.data;
     console.log(`[a9s-sam] Encoding${viewportVersion ? ` - ${viewportVersion}` : ''}`);

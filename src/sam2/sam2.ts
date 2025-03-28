@@ -1,8 +1,14 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
-import type { SAM2, SAM2DecoderPrompt, EncodedImage } from '@/types';
-import { loadModel } from './utils';
+import type { SAM2, SAM2DecoderPrompt, EncodedImage, DownloadProgress } from '@/types';
+import { loadModel as _loadModel, isModelCached as _isModelCached } from './utils';
+import type { Progress } from './utils/fetch-with-progress';
 
 const BASE_PATH = 'https://huggingface.co/g-ronimo/sam2-tiny/resolve/main';
+
+const MODELS = [
+  'sam2_hiera_tiny_encoder.with_runtime_opt.ort',
+  'sam2_hiera_tiny_decoder_pr1.onnx'
+];
 
 // Ported to TS from geronimi73 – MIT license
 // See https://github.com/geronimi73/next-sam/blob/main/app/SAM2.js
@@ -17,11 +23,41 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
 
   let encodedImage: EncodedImage | null = null;
 
-  const init = (): Promise<void> =>
-    Promise.all([
-      loadModel(`${basePath}/sam2_hiera_tiny_encoder.with_runtime_opt.ort`),
-      loadModel(`${basePath}/sam2_hiera_tiny_decoder_pr1.onnx`)
-    ]).then(models => 
+  const loadModels = (onProgress?: (status: DownloadProgress) => void) => {
+    const progress: DownloadProgress[] = MODELS.map(() => ({ loaded: 0, total: Infinity }));
+
+    let totalPercent = 0;
+
+    const onModelProgress = (idx: number) => (next: Progress) => {
+      progress[idx] = next;
+
+      const total = progress.reduce<DownloadProgress>((total, p) => ({
+        loaded: total.loaded + p.loaded,
+        total: total.total + p.total
+      }), { loaded: 0, total: 0});
+
+      const p = Math.round(100 * total.loaded / total.total);
+      
+      if (p !== totalPercent) {
+        totalPercent = p;
+        onProgress && onProgress({
+          loaded: total.loaded,
+          total: total.total,
+          complete: totalPercent === 100
+        });
+      }
+    }
+
+    return Promise.all(MODELS.map((m, idx) => _loadModel(`${basePath}/${m}`, onModelProgress(idx))));
+  }
+
+  const isModelCached = () =>
+    Promise.all(
+      MODELS.map(m => _isModelCached(`${basePath}/${m}`))
+    ).then(cached => cached.every(Boolean));
+
+  const init = (onProgress?: (status: DownloadProgress) => void): Promise<void> =>
+    loadModels(onProgress).then(models => 
       Promise.all(models.map(m => getORTSession(m)))
     ).then(([enc, dec]) => {
       encoder = enc;
@@ -101,8 +137,6 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
       [1, 1, 256, 256]
     );
 
-
-
     const inputs = {
       ...encodedImage,
       point_coords: new Tensor('float32', points.flat(), [
@@ -130,6 +164,7 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
 
   return {
     init,
+    isModelCached,
     encodeImage,
     decode
   }

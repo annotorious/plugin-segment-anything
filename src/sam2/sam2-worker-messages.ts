@@ -1,5 +1,5 @@
 import type { InferenceSession } from 'onnxruntime-web';
-import type { Point, SAM2DecoderPrompt } from '@/types';
+import type { DownloadProgress, Point, SAM2DecoderPrompt } from '@/types';
 
 /** 
  * Command: initialize the SAM2 instance.
@@ -60,6 +60,26 @@ export type SAM2WorkerCommand =
   SAM2WorkerEncodeCommand | 
   SAM2WorkerDecodePreviewCommand | 
   SAM2WorkerDecodeCommand;
+
+interface SAM2WorkerStartDownload {
+
+  type: 'starting_download';
+
+}
+
+interface SAM2WorkerDownloadProgress {
+
+  type: 'download_progress';
+
+  progress: DownloadProgress;
+
+}
+
+/**
+ * Response: model download status.
+ */
+export type SAM2WorkerDownloadStatus =
+  SAM2WorkerStartDownload | SAM2WorkerDownloadProgress;
 
 /**
  * Response: initialization completed successfully.
@@ -140,4 +160,4 @@ export type SAM2WorkerError =
   SAM2WorkerDecodePreviewError |
   SAM2WorkerDecodeError;
 
-export type SAM2WorkerResult = SAM2WorkerSuccess | SAM2WorkerError;
+export type SAM2WorkerResult = SAM2WorkerDownloadStatus | SAM2WorkerSuccess | SAM2WorkerError;

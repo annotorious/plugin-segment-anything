@@ -7,6 +7,16 @@ export interface SAMPluginOpts {
 
 }
 
+export interface DownloadProgress {
+
+  loaded: number;
+
+  total?: number;
+  
+  complete?: boolean;
+
+}
+
 export interface SAMPluginEvents  {
 
   animationFinished: () => void;
@@ -43,7 +53,9 @@ export type Bounds = Size & { x: number, y: number};
 
 export interface SAM2 {
 
-  init(): Promise<void>;
+  init(onProgress?: (status: DownloadProgress) => void): Promise<void>;
+
+  isModelCached(): Promise<boolean>;
 
   encodeImage(input: Tensor, viewportVersion?: number): Promise<void>;
 
