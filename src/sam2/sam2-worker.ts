@@ -5,6 +5,10 @@ import type { Point } from '@/types';
 
 const SAM2 = createSAM2();
 
+export const purgeModel = () => {
+  SAM2.purgeModel();
+}
+
 let previewBusy = false;
 
 let pendingPreview: Point | null = null;

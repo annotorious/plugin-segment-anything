@@ -65,6 +65,8 @@ export interface SAM2 {
 
   decode(input: SAM2DecoderPrompt): Promise<{ result: InferenceSession.OnnxValueMapType, viewportVersion?: number }>;
 
+  purgeModel(): Promise<void>;
+  
 }
 
 export interface SAM2DecoderPrompt {
