@@ -1,6 +1,6 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web/all';
 import type { SAM2, SAM2DecoderPrompt, EncodedImage, DownloadProgress } from '@/types';
-import { loadModel as _loadModel, isModelCached as _isModelCached, deleteModel } from './utils';
+import { loadModel as _loadModel, isModelCached as _isModelCached } from './utils';
 import type { Progress } from './utils/fetch-with-progress';
 
 const BASE_PATH = 'https://huggingface.co/g-ronimo/sam2-tiny/resolve/main';
@@ -55,11 +55,6 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
     Promise.all(
       MODELS.map(m => _isModelCached(`${basePath}/${m}`))
     ).then(cached => cached.every(Boolean));
-
-  const purgeModel = (): Promise<void> =>
-    Promise.all(
-      MODELS.map(m => deleteModel(`${basePath}/${m}`))
-    ).then(() => {})
 
   const init = (onProgress?: (status: DownloadProgress) => void): Promise<void> =>
     loadModels(onProgress).then(models => 
@@ -171,8 +166,7 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
     init,
     isModelCached,
     encodeImage,
-    decode,
-    purgeModel
+    decode
   }
 
 }

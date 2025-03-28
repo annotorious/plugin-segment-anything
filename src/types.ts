@@ -64,8 +64,6 @@ export interface SAM2 {
   encodeImage(input: Tensor, viewportVersion?: number): Promise<void>;
 
   decode(input: SAM2DecoderPrompt): Promise<{ result: InferenceSession.OnnxValueMapType, viewportVersion?: number }>;
-
-  purgeModel(): Promise<void>;
   
 }
 
