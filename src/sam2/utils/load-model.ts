@@ -18,12 +18,6 @@ export const isModelCached = async (url: string) => {
   return Boolean(handle);
 }
 
-export const deleteModel = async (url: string) => {
-  const root = await navigator.storage.getDirectory();
-  const filename = getFilename(url);
-  return root.removeEntry(filename);
-}
-
 /** 
  * Load a model file from cache or URL.
  */ 

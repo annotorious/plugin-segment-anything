@@ -9,7 +9,6 @@ import type { SAMPluginEvents, Point, SAMPluginOpts } from '@/types';
 import { createPreviewCanvas } from './osd-preview-canvas';
 import { createPromptMarkerCanvas } from './osd-prompt-marker-canvas';
 import { createPluginState } from './osd-plugin-state';
-import { purgeModel as _purgeModel } from '@/sam2/sam2-worker';
 
 import './index.css';
 
@@ -358,12 +357,9 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     SAM2.postMessage({ type: 'init' });
   }
 
-  const purgeModel = _purgeModel;
-
   return {
     destroy,
     init,
-    purgeModel,
     reset,
     restart,
     setQueryMode,
