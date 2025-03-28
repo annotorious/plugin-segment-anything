@@ -31,6 +31,10 @@ export interface SAMPluginEvents  {
 
   encodingStart: () => void;
 
+  downloadStart: () => void;
+
+  downloadProgress: (progress: DownloadProgress) => void;
+
   initialized: () => void;
 
   initError: (error: any) => void;

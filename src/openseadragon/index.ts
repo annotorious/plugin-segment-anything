@@ -276,7 +276,12 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
     const { type } = message.data;
 
-    if (type === 'init_success') {
+    if (type === 'starting_download') {
+      emitter.emit('downloadStart');
+    } else if (type === 'download_progress') {
+      const { progress } = message.data;
+      emitter.emit('downloadProgress', progress);
+    } else if (type === 'init_success') {
       // SAM has loaded models and initialized encoder & decoder
       state.isSAMReady = true;
       emitter.emit('initialized');
