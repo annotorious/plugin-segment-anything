@@ -2,7 +2,7 @@ import type { Bounds, Point, SAM2DecoderPrompt } from './types';
 
 const R = window.devicePixelRatio || 1;
 
-export const createInputMarkerCanvas = (container: HTMLDivElement, bounds: Bounds, scale: number) => {
+export const createPromptMarkerCanvas = (container: HTMLDivElement, bounds: Bounds, scale: number) => {
   const canvas = document.createElement('canvas');
   canvas.setAttribute('class', 'a9s-sam-input-markers');
   canvas.width = R * container.offsetWidth;

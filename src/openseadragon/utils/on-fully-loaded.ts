@@ -1,6 +1,6 @@
 export const onFullyLoaded = (viewer: OpenSeadragon.Viewer, callback: () => void) => {
 
-  viewer.addHandler('open', event => {
+  viewer.addHandler('open', () => {
     const itemCount = viewer.world.getItemCount();
 
     const lastItem = viewer.world.getItemAt(itemCount - 1);

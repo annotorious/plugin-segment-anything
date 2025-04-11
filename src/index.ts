@@ -4,7 +4,7 @@ import type { ImageAnnotation, ImageAnnotator } from '@annotorious/annotorious';
 import SAM2Worker from './sam2/sam2-worker.ts?worker';
 import type { SAM2WorkerResult } from './sam2';
 import { canvasToFloat32Array, maskToPolygon, prepareSAM2Canvas } from './utils';
-import { createInputMarkerCanvas } from './input-marker-canvas';
+import { createPromptMarkerCanvas } from './prompt-marker-canvas';
 import { createPreviewCanvas } from './preview-canvas';
 import type { Point, SAM2DecoderPrompt, SAMPluginOpts } from './types';
 
@@ -12,8 +12,6 @@ import './index.css';
 
 export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   let _enabled = false;
-  
-  let _showPreview = true;
 
   let currentAnnotationId: string;
 
@@ -35,7 +33,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   let onPointerMove: ((evt: PointerEvent) => void) | null = null;
   let onPointerDown: ((evt: PointerEvent) => void) | null = null;
 
-  let inputMarkerCanvas: ReturnType<typeof createInputMarkerCanvas>;
+  let promptMarkerCanvas: ReturnType<typeof createPromptMarkerCanvas>;
 
   let previewCanvas: ReturnType<typeof createPreviewCanvas>;
 
@@ -87,14 +85,14 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
 
       previewCanvas?.setVisible(false);
 
-      inputMarkerCanvas?.setInput(input);
+      promptMarkerCanvas?.setInput(input);
 
       SAM2.postMessage({ type: 'decode', input });
     }
 
     previewCanvas = createPreviewCanvas(anno.element, bounds);
 
-    inputMarkerCanvas = createInputMarkerCanvas(anno.element, bounds, scale);
+    promptMarkerCanvas = createPromptMarkerCanvas(anno.element, bounds, scale);
 
     SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
       const { type } = message.data;
@@ -155,7 +153,6 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   }
 
   const setShowPreview = (showPreview: boolean) => {
-    _showPreview = showPreview;
     previewCanvas?.setVisible(showPreview);
   }
 
