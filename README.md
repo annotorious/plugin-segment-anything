@@ -4,12 +4,15 @@ A fully browser-based smart polygon selection tool for Annotorious based on the 
 
 ![Demo](/screenshot.gif "Demo screenshot")
 
-
 > **Important:** this plugin only supports `@annotorious/openseadragon` at this time. Support for 
 > plain (JPEG, PNG,...) images is not yet implemented. [Get in touch via the forum](https://github.com/orgs/annotorious/discussions) if you are interested in 
 > using this with the `@annotorious/annotorious` or `@annotorious/react` packages.
 
 ## Using with OpenSeadragon
+
+```
+npm install @annotorious/plugin-segment-anything
+```
 
 ```ts
 import OpenSeadragon from 'openseadragon';
