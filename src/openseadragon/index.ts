@@ -257,8 +257,6 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   viewer.addHandler('animation-finish', onAnimationFinish);
 
   const destroy = () => {
-    console.log('[a9s-sam] Destroying plugin instance');
-
     _initialized = false;
     _enabled = false;
 
