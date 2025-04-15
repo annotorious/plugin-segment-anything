@@ -265,6 +265,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
     removePointerHandlers();
 
+    viewer?.setMouseNavEnabled(true);
+
     viewer?.removeHandler('animation-start', onAnimationStart);
     viewer?.removeHandler('animation-finish', onAnimationFinish);
   }
