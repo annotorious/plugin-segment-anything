@@ -33,22 +33,22 @@
     "./annotorious-plugin-smart-tools.css": "./dist/annotorious-plugin-sam.css"
   },
   "devDependencies": {
-    "@types/node": "^22.14.1",
-    "@types/openseadragon": "^3.0.10",
+    "@types/node": "^22.15.17",
+    "@types/openseadragon": "^4.1.0",
     "typescript": "^5.8.3",
-    "vite": "^6.2.6",
+    "vite": "^6.3.5",
     "vite-plugin-dts": "^4.5.3",
-    "vite-plugin-static-copy": "^2.3.1"
+    "vite-plugin-static-copy": "^3.0.0"
   },
   "peerDependencies": {
-    "@annotorious/annotorious": "^3.3.3",
-    "@annotorious/openseadragon": "^3.3.3",
+    "@annotorious/annotorious": "^3.3.6",
+    "@annotorious/openseadragon": "^3.3.6",
     "openseadragon": "^4.0.0 || ^5.0.0"
   },
   "dependencies": {
     "@techstark/opencv-js": "^4.10.0-release.1",
     "nanoevents": "^9.1.0",
-    "onnxruntime-web": "^1.21.0",
+    "onnxruntime-web": "^1.22.0",
     "p-debounce": "^4.0.0",
     "uuid": "^11.1.0"
   }

@@ -39,12 +39,7 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        assetFileNames: 'annotorious-plugin-sam.[ext]',
-        globals: {
-          fs: 'fs',
-          path: 'path',
-          crypto: 'crypto'
-        }
+        assetFileNames: 'annotorious-plugin-sam.[ext]'
       },
       external: ['fs', 'path', 'crypto']
     }
