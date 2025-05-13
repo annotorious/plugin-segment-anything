@@ -39,7 +39,12 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        assetFileNames: 'annotorious-plugin-sam.[ext]'
+        assetFileNames: 'annotorious-plugin-sam.[ext]',
+        chunkFileNames: chunkInfo => {
+          if (chunkInfo.name.includes('get-image-bounds')) {
+            return 'a9s-sam.js';
+          }
+        },
       },
       external: ['fs', 'path', 'crypto']
     }
