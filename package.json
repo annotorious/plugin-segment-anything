@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/plugin-segment-anything",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A smart polygon selection tool based on SegmentAnything 2",
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
@@ -33,16 +33,16 @@
     "./annotorious-plugin-smart-tools.css": "./dist/annotorious-plugin-sam.css"
   },
   "devDependencies": {
-    "@types/node": "^22.15.17",
+    "@types/node": "^24.1.0",
     "@types/openseadragon": "^4.1.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
-    "vite-plugin-dts": "^4.5.3",
-    "vite-plugin-static-copy": "^3.0.0"
+    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-static-copy": "^3.1.1"
   },
   "peerDependencies": {
-    "@annotorious/annotorious": "^3.3.6",
-    "@annotorious/openseadragon": "^3.3.6",
+    "@annotorious/annotorious": "^3.6.7",
+    "@annotorious/openseadragon": "^3.6.7",
     "openseadragon": "^4.0.0 || ^5.0.0"
   },
   "dependencies": {
