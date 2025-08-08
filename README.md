@@ -3,7 +3,7 @@
 A fully browser-based smart polygon selection tool for Annotorious, built on the [sam2-hiera-tiny](https://huggingface.co/g-ronimo/sam2-tiny) SegmentAnything model. The implementation is inspired by this [blog post](https://medium.com/@geronimo7/in-browser-image-segmentation-with-segment-anything-model-2-c72680170d92) and [demo code](https://github.com/geronimi73/next-sam).
 
 > [!CAUTION] 
-> **This plugin depends on the [WebGPU API](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API). It will fail to initialize if WebGPU is not avaialable or if hardware acceleration is disabled in the user's browser. If you integrate this plugin into your application, check for WebGPU support in the user's environment and provide clear feedback when it is not supported.**
+> **This plugin depends on the [WebGPU API](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API). It will fail to initialize if WebGPU is not avaialable or if hardware acceleration is disabled in the user's browser. If you integrate this plugin into your application, check for WebGPU support in the user's environment and provide clear feedback to the user when it is not supported.**
 
 ![Demo](/screenshot.gif "Demo screenshot")
 
