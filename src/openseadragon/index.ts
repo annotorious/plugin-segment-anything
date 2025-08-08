@@ -321,16 +321,21 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       if (state.sam) {
         const annotation = maskToAnnotation(message.data.result, state.sam, anno.getUser(), viewer);
 
-        const { store } = anno.state;
+        const { store, selection } = anno.state;
         const previous = store.getAnnotation(state.sam.currentAnnotationId);
 
         if (previous) {
+          // Note: the temporary selection is a trick to work around the 
+          // (unfortunate) decision that the lifecycle UPDATE event is only 
+          // fired on de-select (unlike the create event)! 
+          selection.setSelected(state.sam.currentAnnotationId);
           store.updateAnnotation(state.sam.currentAnnotationId, annotation);
           emitter.emit('updateAnnotation', annotation, previous, state.sam.currentPrompt);
+          selection.clear();
         } else {
           store.addAnnotation(annotation);
           emitter.emit('createAnnotation', annotation, state.sam.currentPrompt);          
-        }
+        }        
       }
     } else if (type === 'init_error') {
       const { error } = message.data;

@@ -58,9 +58,15 @@
 
         plugin.init();
 
-        anno.on('createAnnotation', () => {
+        anno.on('createAnnotation', (annotation) => {
+          console.log('created', annotation);
+
           modeBtn.innerHTML = 'Move';
           anno.setDrawingEnabled(false)
+        });
+
+        anno.on('updateAnnotation', (annotation, previous) => {
+          console.log('updated', previous, 'with', annotation);
         });
 
         const modeBtn = document.getElementById('mode');

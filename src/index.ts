@@ -126,7 +126,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
           }
         };
 
-        const { store, selection } = anno.state;
+        const { store } = anno.state;
 
         const exists = store.getAnnotation(currentAnnotationId);
         if (exists) {
@@ -134,8 +134,6 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
         } else {
           store.addAnnotation(annotation);
         }
-
-        // selection.setSelected(currentAnnotationId);
       }
     });
   
