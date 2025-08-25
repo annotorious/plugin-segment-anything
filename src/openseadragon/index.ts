@@ -13,7 +13,6 @@ import { createPluginState } from './osd-plugin-state';
 
 import './index.css';
 
-
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAMPluginOpts = {}) => {
 
   const { viewer } = anno;

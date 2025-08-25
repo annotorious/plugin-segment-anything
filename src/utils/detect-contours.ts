@@ -1,8 +1,4 @@
 import cv from '@techstark/opencv-js';
-import type { InferenceSession } from 'onnxruntime-web/all';
-import type { Bounds, Point } from '@/types';
-import { maskToCanvas } from './mask-to-canvas';
-import { boundsFromPoints, ShapeType, type Polygon } from '@annotorious/annotorious';
 import { chaikinSmooth } from './chaikin-smooth';
 
 export const detectContours = (mask: HTMLCanvasElement) => {
