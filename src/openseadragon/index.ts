@@ -1,4 +1,5 @@
 import type { OpenSeadragonAnnotator } from '@annotorious/openseadragon';
+import { isTouch } from '@annotorious/annotorious';
 import { v4 as uuidv4 } from 'uuid';
 import { createNanoEvents } from 'nanoevents'
 import type { SAM2WorkerResult } from '@/sam2';
@@ -11,6 +12,7 @@ import { createPromptMarkerCanvas } from './osd-prompt-marker-canvas';
 import { createPluginState } from './osd-plugin-state';
 
 import './index.css';
+
 
 export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAMPluginOpts = {}) => {
 
@@ -48,7 +50,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
   }
 
   const onPointerMove = (evt: PointerEvent) => {
-    if (!state.isSAMReady || !state.isOSDReady) return;
+    if (isTouch || !state.isSAMReady || !state.isOSDReady) return;
 
     // No previews if there is already a prompt
     const hasPrompt = Boolean(state.sam?.currentPrompt)

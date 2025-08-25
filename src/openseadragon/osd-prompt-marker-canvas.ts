@@ -1,7 +1,9 @@
 import type { Bounds, Point, SAM2DecoderPrompt } from '@/types';
 import { createOverlayCanvas } from './utils';
+import { isTouch } from '@annotorious/annotorious';
 
-const MARKER_RADIUS = window.devicePixelRatio || 1;
+const RATIO = window.devicePixelRatio || 1;
+const MARKER_RADIUS = isTouch ? 10 * RATIO : 5 * RATIO;
 
 export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
   const { canvas, ctx } = createOverlayCanvas(viewer);
@@ -15,7 +17,7 @@ export const createPromptMarkerCanvas = (viewer: OpenSeadragon.Viewer) => {
     const y = (pt.y - bounds.y) * scale;
 
     ctx.beginPath();
-    ctx.arc(x, y, 5 * MARKER_RADIUS, 0, 2 * Math.PI, false);
+    ctx.arc(x, y, MARKER_RADIUS, 0, 2 * Math.PI, false);
     ctx.fillStyle = color;
     ctx.fill();
     ctx.lineWidth = 1;
