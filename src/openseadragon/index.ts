@@ -267,10 +267,13 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     removePointerHandlers();
 
     try {
-      viewer?.setMouseNavEnabled(true);
+      // In case the viewer was destroyed first
+      if (viewer?.element) {
+        viewer?.setMouseNavEnabled(true);
 
-      viewer?.removeHandler('animation-start', onAnimationStart);
-      viewer?.removeHandler('animation-finish', onAnimationFinish);
+        viewer?.removeHandler('animation-start', onAnimationStart);
+        viewer?.removeHandler('animation-finish', onAnimationFinish);
+      }
     } catch (error) {
       console.warn(error);
     }
