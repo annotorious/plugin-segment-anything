@@ -1,3 +1,4 @@
+import OpenSeadragon from 'openseadragon';
 import type { OpenSeadragonAnnotator } from '@annotorious/openseadragon';
 import { isTouch } from '@annotorious/annotorious';
 import { v4 as uuidv4 } from 'uuid';

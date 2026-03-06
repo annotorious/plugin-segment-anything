@@ -1,3 +1,5 @@
+import OpenSeadragon from 'openseadragon';
+
 export const onFullyLoaded = (viewer: OpenSeadragon.Viewer, callback: () => void) => {
 
   viewer.addHandler('open', () => {

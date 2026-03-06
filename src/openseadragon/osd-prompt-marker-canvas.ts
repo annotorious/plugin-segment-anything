@@ -1,6 +1,7 @@
+import OpenSeadragon from 'openseadragon';
+import { isTouch } from '@annotorious/annotorious';
 import type { Bounds, Point, SAM2DecoderPrompt } from '@/types';
 import { createOverlayCanvas } from './utils';
-import { isTouch } from '@annotorious/annotorious';
 
 const RATIO = window.devicePixelRatio || 1;
 const MARKER_RADIUS = isTouch ? 10 * RATIO : 5 * RATIO;
