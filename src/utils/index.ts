@@ -8,4 +8,5 @@ export * from './mask-to-polygon';
 export * from './prepare-sam2-canvas';
 export * from './resize-canvas';
 export * from './slice-tensor';
+export * from './trace-polygon';
 export * from './upsample-logits';
