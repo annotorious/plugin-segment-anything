@@ -326,6 +326,11 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
       if (state.sam) {
         const annotation = maskToAnnotation(message.data.result, state.sam, anno.getUser(), viewer);
 
+        if (!annotation) {
+          console.log('[a9s-sam] Empty mask - no annotation');
+          return;
+        }
+
         const { store, selection } = anno.state;
         const previous = store.getAnnotation(state.sam.currentAnnotationId);
 

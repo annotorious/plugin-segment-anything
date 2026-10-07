@@ -2,71 +2,36 @@ import type { InferenceSession } from 'onnxruntime-web/all';
 import OpenSeadragon from 'openseadragon';
 import { boundsFromPoints, ShapeType } from '@annotorious/annotorious';
 import type { ImageAnnotation, Polygon, User } from '@annotorious/annotorious';
-import { detectContours, float32ArrayToCanvas, sliceTensor } from '@/utils';
+import { bestMaskLogits, tracePolygon, upsampleLogits } from '@/utils';
 import type { OSDSAMState } from '../osd-plugin-state';
 
 /**
- * Converts the mask to a 
+ * Converts the SAM decoder result to a polygon annotation. Returns
+ * undefined if the mask is empty.
  */
-const maskToCanvas = (
-  result: InferenceSession.ReturnType, 
-  foreground: [number, number, number, number] = [255, 255, 255, 255], // white
-  background: [number, number, number, number] = [0, 0, 0, 255] // black
-) => {
-  // SAM2 returns 3 masks along with scores – select best one
-  // See https://github.com/geronimi73/next-sam/blob/main/app/page.jsx
-  const maskTensors = result.masks;
-
-  // Mask dimension will be 256x256 (by design of the SAM2 model)
-  const [_, __, width, height] = maskTensors.dims;
-
-  // @ts-ignore
-  const maskScores = result.iou_predictions.cpuData;
-  const bestMaskIdx = maskScores.indexOf(Math.max(...maskScores));
-
-  // HTML canvas, 256x256 px
-  const bestMask = float32ArrayToCanvas(
-    sliceTensor(maskTensors, bestMaskIdx), 
-    width, 
-    height,
-    foreground,
-    background
-  );
-
-  return bestMask;
-}
-
 export const maskToAnnotation = (
-  result: InferenceSession.OnnxValueMapType, 
+  result: InferenceSession.OnnxValueMapType,
   state: OSDSAMState,
   user: User,
   viewer: OpenSeadragon.Viewer
-) => {
-  // SAM mask as B/W canvas, 256 x 256 px
-  const { canvas: mask } = maskToCanvas(result);
-
+): ImageAnnotation | undefined => {
   const { offsetWidth: w, offsetHeight: h } = viewer.element;
 
-  // Resize & crop to current viewport dimensions
-  const resized = document.createElement('canvas');
-  resized.width = w;
-  resized.height = h;
+  // Upsample the logits (not the thresholded mask!) to viewport
+  // resolution, cropping off the letterbox padding
+  const { logits, size } = bestMaskLogits(result);
+  const upsampled = upsampleLogits(logits, size, state.currentBounds, w, h);
 
-  const scale = Math.max(w, h) / 1024;
-  const padX = state.currentBounds.x * scale;
-  const padY = state.currentBounds.y * scale;
+  const binary = new Uint8Array(upsampled.length);
+  for (let i = 0; i < upsampled.length; i++) {
+    binary[i] = upsampled[i] > 0 ? 1 : 0;
+  }
 
-  const ctx = resized.getContext('2d');
-  ctx.drawImage(
-    mask,
-    - padX,
-    - padY,
-    scale * state.currentBounds.w + 2 * padX,
-    scale * state.currentBounds.h + 2 * padY
-  );
+  const contour = tracePolygon(binary, w, h);
+  if (contour.length < 3) return;
 
   // Polygon points mapped to OSD image coordinate space
-  const points: [number, number][] = detectContours(resized).map(pt => {
+  const points: [number, number][] = contour.map(pt => {
     // Note that–for unknown reasons–will return [0, 0] when used in a consuming application
     // that provides its own OpenSeadragon import
     // viewer.viewport.viewerElementToImageCoordinates(pt[0], pt[1]);
