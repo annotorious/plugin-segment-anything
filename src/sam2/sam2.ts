@@ -58,8 +58,11 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
 
   const init = (onProgress?: (status: DownloadProgress) => void): Promise<void> =>
     loadModels(onProgress).then(async ([encoderModel, decoderModel]) => {
-      encoder ??= await getORTSession(encoderModel);
-      decoder ??= await getORTSession(decoderModel);
+      if (!encoder)
+        encoder = await getORTSession(encoderModel);
+
+      if (!decoder)
+        decoder = await getORTSession(decoderModel);
     }).catch((error) => {
       console.error('[a9s-sam] Initialization failed:', error);
       throw error;
