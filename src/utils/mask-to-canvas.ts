@@ -1,4 +1,4 @@
-import type { InferenceSession } from 'onnxruntime-web/all';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 import { float32ArrayToCanvas } from './float32-to-canvas';
 import { sliceTensor } from './slice-tensor';
 import type { Bounds } from '@/types';

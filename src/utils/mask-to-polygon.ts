@@ -1,5 +1,5 @@
 import cv from '@techstark/opencv-js';
-import type { InferenceSession } from 'onnxruntime-web/all';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 import type { Bounds } from '@/types';
 import { maskToCanvas } from './mask-to-canvas';
 import { boundsFromPoints, ShapeType, type Polygon } from '@annotorious/annotorious';

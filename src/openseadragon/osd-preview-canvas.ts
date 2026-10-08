@@ -1,5 +1,5 @@
 import type OpenSeadragon from 'openseadragon';
-import type { InferenceSession } from 'onnxruntime-web/all';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 import type { Bounds, SAMPluginOpts } from '@/types';
 import { bestMaskLogits, upsampleLogits } from '@/utils';
 import { createOverlayCanvas } from './utils';

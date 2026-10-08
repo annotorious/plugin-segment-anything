@@ -1,4 +1,4 @@
-import { InferenceSession, Tensor } from 'onnxruntime-web/all';
+import { InferenceSession, Tensor } from 'onnxruntime-web/webgpu';
 import type { SAM2, SAM2DecoderPrompt, EncodedImage, DownloadProgress } from '@/types';
 import { loadModel as _loadModel, isModelCached as _isModelCached } from './utils';
 import type { Progress } from './utils/fetch-with-progress';
@@ -57,11 +57,9 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
     ).then(cached => cached.every(Boolean));
 
   const init = (onProgress?: (status: DownloadProgress) => void): Promise<void> =>
-    loadModels(onProgress).then(models => 
-      Promise.all(models.map(m => getORTSession(m)))
-    ).then(([enc, dec]) => {
-      encoder = enc;
-      decoder = dec;
+    loadModels(onProgress).then(async ([encoderModel, decoderModel]) => {
+      encoder ??= await getORTSession(encoderModel);
+      decoder ??= await getORTSession(decoderModel);
     }).catch((error) => {
       console.error('[a9s-sam] Initialization failed:', error);
       throw error;

@@ -1,18 +1,10 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import dts from 'vite-plugin-dts';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
+  base: './',
   plugins: [
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/onnxruntime-web/dist/*.wasm',
-          dest: 'node_modules/.vite/deps'
-        }
-      ]
-    }),
     dts({
       insertTypesEntry: true,
       include: ['./src/'],
@@ -21,6 +13,7 @@ export default defineConfig({
   ],
   publicDir: 'models',
   resolve: {
+    conditions: ['onnxruntime-web-use-extern-wasm'],
     alias: {
       '@': path.resolve(import.meta.dirname, './src')
     }

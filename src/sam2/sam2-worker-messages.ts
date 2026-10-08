@@ -1,4 +1,4 @@
-import type { InferenceSession } from 'onnxruntime-web';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 import type { DownloadProgress, Point, SAM2DecoderPrompt } from '@/types';
 
 /** 

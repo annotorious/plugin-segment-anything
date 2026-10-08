@@ -1,7 +1,14 @@
-import { Tensor } from 'onnxruntime-web/all';
+import { env, Tensor } from 'onnxruntime-web/webgpu';
+import wasmModuleUrl from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url&no-inline';
+import wasmBinaryUrl from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url&no-inline';
 import { createSAM2 } from './sam2';
 import type { SAM2WorkerCommand } from './sam2-worker-messages';
 import type { Point } from '@/types';
+
+env.wasm.wasmPaths = {
+  mjs: new URL(wasmModuleUrl, new URL('../', import.meta.url)).href,
+  wasm: new URL(wasmBinaryUrl, new URL('../', import.meta.url)).href
+};
 
 const SAM2 = createSAM2();
 

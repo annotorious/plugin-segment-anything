@@ -16,6 +16,10 @@ A fully browser-based smart polygon selection tool for Annotorious, built on the
 npm install @annotorious/plugin-segment-anything
 ```
 
+The production build uses ONNX Runtime's WebGPU-only entry point and emits its
+WASM loader and binary as separate assets. The worker configures their URLs
+explicitly, so the assets must be preserved and served with the built package.
+
 ## How to Use
 
 Create annotations with the Annotorious SegmentAnything plugin as follows:

@@ -1,4 +1,4 @@
-import type { Tensor } from 'onnxruntime-web/all';
+import type { Tensor } from 'onnxruntime-web/webgpu';
 
 // Ported to TS from geronimi73 – MIT license
 // https://github.com/geronimi73/next-sam/blob/main/lib/imageutils.js

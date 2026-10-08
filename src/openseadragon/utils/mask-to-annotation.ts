@@ -1,4 +1,4 @@
-import type { InferenceSession } from 'onnxruntime-web/all';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 import OpenSeadragon from 'openseadragon';
 import { boundsFromPoints, ShapeType } from '@annotorious/annotorious';
 import type { ImageAnnotation, Polygon, User } from '@annotorious/annotorious';
