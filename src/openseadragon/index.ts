@@ -67,6 +67,8 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
 
   // Common code for onCanvasClick and onPointerDown
   const handlePointerDown = (evt: PointerEvent) => {
+    if (!state.sam) return;
+
     const pt = { x: evt.offsetX, y: evt.offsetY };
 
     const translated = viewportToSAM2Coordinates(pt);
@@ -340,11 +342,11 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
           // fired on de-select (unlike the create event)! 
           selection.setSelected(state.sam.currentAnnotationId);
           store.updateAnnotation(state.sam.currentAnnotationId, annotation);
-          emitter.emit('updateAnnotation', annotation, previous, state.sam.currentPrompt);
+          emitter.emit('updateAnnotation', annotation, previous, state.sam.currentPrompt!);
           selection.clear();
         } else {
           store.addAnnotation(annotation);
-          emitter.emit('createAnnotation', annotation, state.sam.currentPrompt);          
+          emitter.emit('createAnnotation', annotation, state.sam.currentPrompt!);          
         }        
       }
     } else if (type === 'init_error') {

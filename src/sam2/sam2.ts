@@ -19,7 +19,7 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
   let encodingBusy = false;
   let decodingBusy = false;
 
-  let currentViewportVersion: number | undefined = null;
+  let currentViewportVersion: number | undefined = undefined;
 
   let encodedImage: EncodedImage | null = null;
 
@@ -33,10 +33,10 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
 
       const total = progress.reduce<DownloadProgress>((total, p) => ({
         loaded: total.loaded + p.loaded,
-        total: total.total + p.total
+        total: total.total! + p.total!
       }), { loaded: 0, total: 0});
 
-      const p = Math.round(100 * total.loaded / total.total);
+      const p = Math.round(100 * total.loaded / total.total!);
       
       if (p !== totalPercent) {
         totalPercent = p;
@@ -75,7 +75,7 @@ export const createSAM2 = (basePath = BASE_PATH): SAM2 => {
     });
   
   const encodeImage = (input: Tensor, viewportVersion?: number): Promise<void> => {
-    encodedImage = undefined;
+    encodedImage = null;
     
     if (!encoder) return Promise.reject('[a9s-sam] Encoder not initialized');
 
