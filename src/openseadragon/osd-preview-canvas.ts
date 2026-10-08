@@ -65,7 +65,7 @@ export const createPreviewCanvas = (viewer: OpenSeadragon.Viewer, opts: SAMPlugi
 
   const show = () => {
     // Temporary
-    canvas.style.display = 'none';
+    canvas.style.display = 'block';
   }
 
   const hide = () => {
