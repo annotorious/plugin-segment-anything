@@ -1,5 +1,5 @@
+export * from './best-mask-logits';
 export * from './canvas-to-float32';
-export * from './detect-contours';
 export * from './float32-to-canvas';
 export * from './get-image-bounds';
 export * from './mask-to-canvas';
@@ -7,3 +7,5 @@ export * from './mask-to-polygon';
 export * from './prepare-sam2-canvas';
 export * from './resize-canvas';
 export * from './slice-tensor';
+export * from './trace-polygon';
+export * from './upsample-logits';
