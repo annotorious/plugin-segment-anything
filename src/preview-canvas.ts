@@ -1,4 +1,4 @@
-import type { InferenceSession } from 'onnxruntime-web/all';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 import { maskToCanvas } from './utils';
 import type { Bounds } from './types';
 

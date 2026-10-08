@@ -4,7 +4,7 @@ import { isTouch } from '@annotorious/annotorious';
 import { v4 as uuidv4 } from 'uuid';
 import { createNanoEvents } from 'nanoevents'
 import type { SAM2WorkerResult } from '@/sam2';
-import SAM2Worker from '@/sam2/sam2-worker.ts?worker';
+import SAM2WorkerUrl from '@/sam2/sam2-worker.ts?worker&url';
 import { canvasToFloat32Array } from '@/utils';
 import { maskToAnnotation, onFullyLoaded, prepareOsdSamCanvas } from '@/openseadragon/utils';
 import type { SAMPluginEvents, Point, SAMPluginOpts } from '@/types';
@@ -282,7 +282,7 @@ export const mountOpenSeadragonPlugin = (anno: OpenSeadragonAnnotator, opts: SAM
     }
   }
 
-  const SAM2 = new SAM2Worker();
+  const SAM2 = new Worker(new URL(SAM2WorkerUrl, import.meta.url), { type: 'module' });
 
   SAM2.onmessage = ((message: MessageEvent<SAM2WorkerResult>) => {
     const { type } = message.data;

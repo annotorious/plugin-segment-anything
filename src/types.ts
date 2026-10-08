@@ -1,5 +1,5 @@
 import type { ImageAnnotation } from '@annotorious/annotorious';
-import type { InferenceSession, Tensor } from 'onnxruntime-web/all';
+import type { InferenceSession, Tensor } from 'onnxruntime-web/webgpu';
 
 export interface SAMPluginOpts {
 

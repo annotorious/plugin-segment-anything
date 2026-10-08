@@ -1,4 +1,4 @@
-import type { InferenceSession } from 'onnxruntime-web/all';
+import type { InferenceSession } from 'onnxruntime-web/webgpu';
 
 /**
  * SAM2 returns 3 masks along with IoU scores – returns the logits

@@ -1,7 +1,7 @@
 import pDebounce from 'p-debounce';
 import { v4 as uuidv4 } from 'uuid';
 import type { ImageAnnotation, ImageAnnotator } from '@annotorious/annotorious';
-import SAM2Worker from './sam2/sam2-worker.ts?worker';
+import SAM2WorkerUrl from './sam2/sam2-worker.ts?worker&url';
 import type { SAM2WorkerResult } from './sam2';
 import { canvasToFloat32Array, maskToPolygon, prepareSAM2Canvas } from './utils';
 import { createPromptMarkerCanvas } from './prompt-marker-canvas';
@@ -28,7 +28,7 @@ export const mountPlugin = (anno: ImageAnnotator, opts: SAMPluginOpts = {}) => {
   const image = container?.querySelector('img') as HTMLImageElement;
   if (!image) return;
 
-  const SAM2 = new SAM2Worker();
+  const SAM2 = new Worker(new URL(SAM2WorkerUrl, import.meta.url), { type: 'module' });
 
   let onPointerMove: ((evt: PointerEvent) => void) | null = null;
   let onPointerDown: ((evt: PointerEvent) => void) | null = null;
